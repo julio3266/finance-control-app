@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAppSelector } from '@app/store';
+import type { RootState } from '@app/store';
 import { AuthRoutes } from '@app/modules/auth/routes';
 import { HomeRoutes } from '@app/modules/Home/routes';
 
@@ -13,7 +14,9 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const AppNavigator: React.FC = () => {
-    const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+    const isAuthenticated = useAppSelector<boolean>(
+        (state: RootState) => (state.auth as { isAuthenticated: boolean }).isAuthenticated,
+    );
 
     return (
         <NavigationContainer>
@@ -32,4 +35,3 @@ export const AppNavigator: React.FC = () => {
         </NavigationContainer>
     );
 };
-

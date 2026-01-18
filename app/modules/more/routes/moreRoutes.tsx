@@ -8,15 +8,12 @@ export type MoreStackParamList = {
 
 const Stack = createNativeStackNavigator<MoreStackParamList>();
 
-export const MoreRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="More" component={MoreScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const MoreRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="More" component={MoreScreen} />
+    </Stack.Navigator>
+);

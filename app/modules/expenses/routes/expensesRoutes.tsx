@@ -8,15 +8,12 @@ export type ExpensesStackParamList = {
 
 const Stack = createNativeStackNavigator<ExpensesStackParamList>();
 
-export const ExpensesRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Expenses" component={ExpensesScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const ExpensesRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="Expenses" component={ExpensesScreen} />
+    </Stack.Navigator>
+);

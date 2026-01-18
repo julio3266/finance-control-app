@@ -19,57 +19,54 @@ export type HomeTabParamList = {
 
 const Tab = createBottomTabNavigator<HomeTabParamList>();
 
-export const HomeRoutes: React.FC = () => {
-    return (
-        <Tab.Navigator
-            tabBar={(props) => <BottomNavigationBar {...props} />}
-            screenOptions={{
-                headerShown: false,
+export const HomeRoutes: React.FC = () => (
+    <Tab.Navigator
+        tabBar={(props) => <BottomNavigationBar {...props} />}
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Tab.Screen
+            name="Dashboard"
+            component={DashboardRoutes}
+            options={{
+                tabBarLabel: 'Dashboard',
             }}
-        >
-            <Tab.Screen
-                name="Dashboard"
-                component={DashboardRoutes}
-                options={{
-                    tabBarLabel: 'Dashboard',
-                }}
-            />
-            <Tab.Screen
-                name="Extract"
-                component={ExtractRoutes}
-                options={{
-                    tabBarLabel: 'Extrato',
-                }}
-            />
-            <Tab.Screen
-                name="Investiments"
-                component={InvestimentsRoutes}
-                options={{
-                    tabBarLabel: 'Investimentos',
-                }}
-            />
-            <Tab.Screen
-                name="More"
-                component={MoreRoutes}
-                options={{
-                    tabBarLabel: 'Mais',
-                }}
-            />
-            <Tab.Screen
-                name="Expenses"
-                component={ExpensesRoutes}
-                options={{
-                    tabBarButton: () => null,
-                }}
-            />
-            <Tab.Screen
-                name="Incomes"
-                component={IncomesRoutes}
-                options={{
-                    tabBarButton: () => null,
-                }}
-            />
-        </Tab.Navigator>
-    );
-};
-
+        />
+        <Tab.Screen
+            name="Extract"
+            component={ExtractRoutes}
+            options={{
+                tabBarLabel: 'Extrato',
+            }}
+        />
+        <Tab.Screen
+            name="Investiments"
+            component={InvestimentsRoutes}
+            options={{
+                tabBarLabel: 'Investimentos',
+            }}
+        />
+        <Tab.Screen
+            name="More"
+            component={MoreRoutes}
+            options={{
+                tabBarLabel: 'Mais',
+            }}
+        />
+        <Tab.Screen
+            name="Expenses"
+            component={ExpensesRoutes}
+            options={{
+                tabBarButton: () => null,
+            }}
+        />
+        <Tab.Screen
+            name="Incomes"
+            component={IncomesRoutes}
+            options={{
+                tabBarButton: () => null,
+            }}
+        />
+    </Tab.Navigator>
+);

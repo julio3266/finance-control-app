@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@app/store';
+import type { RootState } from '@app/store';
 import { styles } from './styles';
 import { useTheme } from '@app/utils/useTheme';
 import { TextInput } from '@app/ui/TextInput';
 import { Button } from '@app/ui/Button';
-import { emailSchema } from '../../schemas';
-import { sendOtp } from '../../slices/authApi';
+import { emailSchema } from '@auth/schemas';
+import { sendOtp } from '@auth/slices/authApi';
 import { ZodError } from 'zod';
 
 interface LoginFormProps {
@@ -17,7 +18,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     const theme = useTheme();
     const styled = styles(theme);
     const dispatch = useAppDispatch();
-    const loading = useAppSelector((state) => state.auth.loading);
+    const loading = useAppSelector<boolean>(
+        (state: RootState) => (state.auth as { loading: boolean }).loading,
+    );
 
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -31,10 +34,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
     const handleSubmit = async () => {
         try {
-
             emailSchema.parse({ email });
             setEmailError('');
-
 
             await dispatch(sendOtp(email)).unwrap();
 
@@ -98,4 +99,3 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         </KeyboardAvoidingView>
     );
 };
-

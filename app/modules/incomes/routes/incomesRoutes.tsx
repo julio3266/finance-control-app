@@ -8,15 +8,12 @@ export type IncomesStackParamList = {
 
 const Stack = createNativeStackNavigator<IncomesStackParamList>();
 
-export const IncomesRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Incomes" component={IncomesScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const IncomesRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="Incomes" component={IncomesScreen} />
+    </Stack.Navigator>
+);

@@ -14,31 +14,20 @@ class ApiClient {
         this.timeout = config.apiTimeout;
     }
 
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<T> {
-    
-        const baseUrl = this.baseURL.endsWith('/') 
-            ? this.baseURL.slice(0, -1) 
-            : this.baseURL;
-        const endpointPath = endpoint.startsWith('/') 
-            ? endpoint 
-            : `/${endpoint}`;
+    private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+        const baseUrl = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
+        const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
         const url = `${baseUrl}${endpointPath}`;
-        
-   
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
         try {
-           
-
             const response = await fetch(url, {
                 method: options.method || 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     ...options.headers,
                 },
                 body: options.body,
@@ -49,7 +38,6 @@ class ApiClient {
 
             clearTimeout(timeoutId);
 
-        
             if (!response.ok) {
                 let errorData = {};
                 try {
@@ -58,9 +46,11 @@ class ApiClient {
                     const text = await response.text().catch(() => '');
                     errorData = text ? { message: text } : {};
                 }
-                
+
                 const error: ApiError = {
-                    message: (errorData as any).message || `Erro ${response.status}: ${response.statusText}`,
+                    message:
+                        (errorData as any).message ||
+                        `Erro ${response.status}: ${response.statusText}`,
                     status: response.status,
                 };
                 throw error;
@@ -70,15 +60,15 @@ class ApiClient {
             return data;
         } catch (error) {
             clearTimeout(timeoutId);
-            
-          
-            
+
             if (error instanceof Error) {
                 if (error.name === 'AbortError') {
-                    throw { message: 'Tempo de requisição excedido' } as ApiError;
+                    const apiError: ApiError = { message: 'Tempo de requisição excedido' };
+                    throw apiError;
                 }
-                
-                throw { message: error.message } as ApiError;
+
+                const apiError: ApiError = { message: error.message };
+                throw apiError;
             }
             throw error;
         }
@@ -99,4 +89,3 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
-

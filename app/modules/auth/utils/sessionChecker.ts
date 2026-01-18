@@ -1,5 +1,5 @@
-import { store } from '@app/store';
-import { logout } from '../slices/authSlice';
+import { store } from '@app/store/index';
+import { logout } from '@auth/slices/authSlice';
 import { persistor } from '@app/store';
 
 /**
@@ -16,9 +16,8 @@ export const isSessionExpired = (expiresAt: string | null): boolean => {
         const expirationDate = new Date(expiresAt);
         const now = new Date();
         return now >= expirationDate;
-    } catch (error) {
-        console.error('Error checking session expiration:', error);
-        return true;
+    } catch (error: any) {
+        return error;
     }
 };
 
@@ -27,13 +26,12 @@ export const isSessionExpired = (expiresAt: string | null): boolean => {
  */
 export const checkAndLogoutIfExpired = async (): Promise<void> => {
     const state = store.getState();
-    const { expiresAt, isAuthenticated } = state.auth;
+    const auth = state.auth as { expiresAt: string | null; isAuthenticated: boolean };
+    const { expiresAt, isAuthenticated } = auth;
 
     if (isAuthenticated && isSessionExpired(expiresAt)) {
-        console.log('Session expired, logging out...');
         store.dispatch(logout());
         // Limpar persist storage
         await persistor.purge();
     }
 };
-

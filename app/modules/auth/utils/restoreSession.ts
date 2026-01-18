@@ -9,14 +9,13 @@ import { isSessionExpired } from './sessionChecker';
 export const restoreSession = async (): Promise<boolean> => {
     try {
         const session = await sessionStorage.load();
-        
+
         if (!session) {
             return false;
         }
 
         // Verificar se a sessão expirou
         if (isSessionExpired(session.expiresAt)) {
-            console.log('Session expired, clearing storage...');
             await sessionStorage.clear();
             return false;
         }
@@ -28,8 +27,7 @@ export const restoreSession = async (): Promise<boolean> => {
 
         return true;
     } catch (error) {
-        console.error('Error restoring session:', error);
+        // Error restoring session
         return false;
     }
 };
-

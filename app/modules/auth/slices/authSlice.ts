@@ -11,7 +11,7 @@ interface AuthState {
     error: string | null;
     isOnboardingQualified: boolean;
     otpAttempts: number;
-    lockUntil: string | null; 
+    lockUntil: string | null;
 }
 
 const initialState: AuthState = {
@@ -21,7 +21,7 @@ const initialState: AuthState = {
     email: null,
     expiresAt: null,
     loading: false,
-    error: null,    
+    error: null,
     isOnboardingQualified: false,
     otpAttempts: 0,
     lockUntil: null,
@@ -31,8 +31,8 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-     setOtp: (state, action: PayloadAction<string>) => {
-        state.otp = action.payload;
+        setOtp: (state, action: PayloadAction<string>) => {
+            state.otp = action.payload;
         },
         setEmail: (state, action: PayloadAction<string>) => {
             state.email = action.payload;
@@ -110,16 +110,15 @@ const authSlice = createSlice({
     },
 });
 
-export const { 
-    setOtp, 
-    setEmail, 
-    setToken, 
-    logout, 
-    clearError, 
+export const {
+    setOtp,
+    setEmail,
+    setToken,
+    logout,
+    clearError,
     setExpiresAt,
     incrementOtpAttempts,
     resetOtpAttempts,
     unlockAccount,
 } = authSlice.actions;
 export default authSlice.reducer;
-

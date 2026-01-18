@@ -12,14 +12,9 @@ export default function ExtractScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
-                <View style={styled.balanceContainer}>
-                </View>
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
+                <View style={styled.balanceContainer} />
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

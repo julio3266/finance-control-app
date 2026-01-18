@@ -2,10 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { setOtp, setEmail } from './authSlice';
 import { apiClient, ApiError } from '@app/utils/api';
 
-interface SendOtpRequest {
-    email: string;
-}
-
 interface SendOtpResponse {
     message: string;
     expiresAt: string;
@@ -29,9 +25,9 @@ export const sendOtp = createAsyncThunk(
     async (email: string, { dispatch, rejectWithValue }) => {
         try {
             const response = await apiClient.post<SendOtpResponse>('/api/auth/otp/request', {
-                email
+                email,
             });
-          
+
             dispatch(setEmail(email));
             return response;
         } catch (error) {
@@ -39,7 +35,7 @@ export const sendOtp = createAsyncThunk(
             const errorMessage = apiError.message || 'Erro ao enviar código';
             return rejectWithValue(errorMessage);
         }
-    }
+    },
 );
 
 export const loginUser = createAsyncThunk(
@@ -63,5 +59,5 @@ export const loginUser = createAsyncThunk(
             const errorMessage = apiError.message || 'Erro ao fazer login';
             return rejectWithValue(errorMessage);
         }
-    }
+    },
 );

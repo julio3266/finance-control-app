@@ -1,17 +1,24 @@
+/// <reference types="../redux-persist" />
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { store, persistor, useAppSelector } from './store';
+import { store, persistor, useAppSelector, RootState } from './store';
 import { AppNavigator } from './navigation/AppNavigator';
 import { checkAndLogoutIfExpired, isSessionExpired } from './modules/auth/utils/sessionChecker';
 
 function AppContent() {
-    const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-    const expiresAt = useAppSelector((state) => state.auth.expiresAt);
-    const themeMode = useAppSelector((state) => state.theme.mode);
+    const isAuthenticated = useAppSelector<boolean>(
+        (state: RootState) => (state.auth as { isAuthenticated: boolean }).isAuthenticated,
+    );
+    const expiresAt = useAppSelector<string | null>(
+        (state: RootState) => (state.auth as { expiresAt: string | null }).expiresAt,
+    );
+    const themeMode = useAppSelector<'dark' | 'light'>(
+        (state: RootState) => (state.theme as { mode: 'dark' | 'light' }).mode,
+    );
 
     useEffect(() => {
         if (isAuthenticated && isSessionExpired(expiresAt)) {
@@ -53,6 +60,3 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
-
-
-

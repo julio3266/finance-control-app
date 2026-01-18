@@ -6,7 +6,4 @@ export const useTheme = (): Theme => {
     return themeMode === 'dark' ? darkTheme : lightTheme;
 };
 
-export const useThemeMode = () => {
-    return useAppSelector((state) => state.theme.mode);
-};
-
+export const useThemeMode = () => useAppSelector((state) => state.theme.mode);

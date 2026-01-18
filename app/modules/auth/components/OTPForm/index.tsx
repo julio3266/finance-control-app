@@ -13,9 +13,10 @@ import { styles } from './styles';
 import { useTheme, useThemeMode } from '@app/utils/useTheme';
 import { Button } from '@app/ui/Button';
 import { useAppDispatch, useAppSelector } from '@app/store';
-import { loginUser } from '../../slices/authApi';
-import { incrementOtpAttempts, resetOtpAttempts, unlockAccount } from '../../slices/authSlice';
-import { otpSchema } from '../../schemas';
+import type { RootState } from '@app/store';
+import { loginUser } from '@auth/slices/authApi';
+import { incrementOtpAttempts, unlockAccount } from '@auth/slices/authSlice';
+import { otpSchema } from '@auth/schemas';
 import { ZodError } from 'zod';
 import { AccountLockedModal } from '../AccountLockedModal';
 
@@ -30,9 +31,15 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
     const themeMode = useThemeMode();
     const styled = styles(theme, themeMode);
     const dispatch = useAppDispatch();
-    const loading = useAppSelector((state) => state.auth.loading);
-    const otpAttempts = useAppSelector((state) => state.auth.otpAttempts);
-    const lockUntil = useAppSelector((state) => state.auth.lockUntil);
+    const loading = useAppSelector<boolean>(
+        (state: RootState) => (state.auth as { loading: boolean }).loading,
+    );
+    const otpAttempts = useAppSelector<number>(
+        (state: RootState) => (state.auth as { otpAttempts: number }).otpAttempts,
+    );
+    const lockUntil = useAppSelector<string | null>(
+        (state: RootState) => (state.auth as { lockUntil: string | null }).lockUntil,
+    );
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [otpError, setOtpError] = useState('');
     const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -41,7 +48,10 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
     const isLocked = lockUntil ? new Date(lockUntil) > new Date() : false;
     const getRemainingSeconds = (): number => {
         if (!lockUntil) return 0;
-        const remaining = Math.max(0, Math.floor((new Date(lockUntil).getTime() - Date.now()) / 1000));
+        const remaining = Math.max(
+            0,
+            Math.floor((new Date(lockUntil).getTime() - Date.now()) / 1000),
+        );
         return remaining;
     };
 
@@ -101,8 +111,7 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
                 setTimeout(() => {
                     inputRefs.current[index - 1]?.focus();
                 }, 0);
-            }
-            else if (!otp[index] && index > 0) {
+            } else if (!otp[index] && index > 0) {
                 inputRefs.current[index - 1]?.focus();
             }
         }
@@ -179,9 +188,7 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
         clearOtp();
     };
 
-    const handleResend = () => {
-        console.log('Reenviar código');
-    };
+    const handleResend = () => {};
 
     return (
         <KeyboardAvoidingView
@@ -213,9 +220,7 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
                 </View>
 
                 <Text style={styled.title}>Verifique seu email</Text>
-                <Text style={styled.subtitle}>
-                    Enviamos um código de 6 dígitos para
-                </Text>
+                <Text style={styled.subtitle}>Enviamos um código de 6 dígitos para</Text>
                 <Text style={styled.email}>{email}</Text>
 
                 <Animated.View
@@ -239,9 +244,7 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
                             ]}
                             value={digit}
                             onChangeText={(value) => handleOtpChange(value, index)}
-                            onKeyPress={({ nativeEvent }) =>
-                                handleKeyPress(nativeEvent.key, index)
-                            }
+                            onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
                             keyboardType="number-pad"
                             maxLength={6}
                             selectTextOnFocus
@@ -255,9 +258,7 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
                     ))}
                 </Animated.View>
 
-                {otpError && (
-                    <Text style={styled.errorText}>{otpError}</Text>
-                )}
+                {otpError && <Text style={styled.errorText}>{otpError}</Text>}
 
                 <Button
                     title="Verificar Código"
@@ -283,4 +284,3 @@ export const OTPForm: React.FC<OTPFormProps> = ({ email, onBack, onClose }) => {
         </KeyboardAvoidingView>
     );
 };
-

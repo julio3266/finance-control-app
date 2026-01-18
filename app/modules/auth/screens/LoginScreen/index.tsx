@@ -1,11 +1,6 @@
 import { useTheme } from '@app/utils/useTheme';
 import React, { useEffect, useRef } from 'react';
-import {
-    KeyboardAvoidingView,
-    Platform,
-    View,
-    Animated,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Animated } from 'react-native';
 import { LoginForm, OTPForm } from '../../components';
 import { IHandles } from 'react-native-modalize/lib/options';
 import { styles } from './styles';
@@ -35,7 +30,7 @@ export default function LoginScreen() {
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [fadeAnim, slideAnim]);
 
     const openModal = () => {
         modalizeRef.current?.open();

@@ -8,16 +8,13 @@ export type AuthStackParamList = {
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
-export const AuthRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-                animation: 'slide_from_right',
-            }}
-        >
-            <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const AuthRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right',
+        }}
+    >
+        <Stack.Screen name="Login" component={LoginScreen} />
+    </Stack.Navigator>
+);

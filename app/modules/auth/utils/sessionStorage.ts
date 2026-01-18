@@ -14,7 +14,7 @@ export const sessionStorage = {
         try {
             await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
         } catch (error) {
-            console.error('Error saving session:', error);
+            // Error saving session
         }
     },
 
@@ -26,7 +26,7 @@ export const sessionStorage = {
             }
             return null;
         } catch (error) {
-            console.error('Error loading session:', error);
+            // Error loading session
             return null;
         }
     },
@@ -35,8 +35,7 @@ export const sessionStorage = {
         try {
             await AsyncStorage.removeItem(SESSION_KEY);
         } catch (error) {
-            console.error('Error clearing session:', error);
+            // Error clearing session
         }
     },
 };
-

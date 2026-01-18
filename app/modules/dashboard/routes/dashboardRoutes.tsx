@@ -8,15 +8,12 @@ export type DashboardStackParamList = {
 
 const Stack = createNativeStackNavigator<DashboardStackParamList>();
 
-export const DashboardRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Dashboard" component={DashboardScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const DashboardRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+    </Stack.Navigator>
+);

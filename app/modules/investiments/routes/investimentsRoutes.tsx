@@ -8,15 +8,12 @@ export type InvestimentsStackParamList = {
 
 const Stack = createNativeStackNavigator<InvestimentsStackParamList>();
 
-export const InvestimentsRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Investiments" component={InvestimentsScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const InvestimentsRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="Investiments" component={InvestimentsScreen} />
+    </Stack.Navigator>
+);

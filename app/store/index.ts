@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
     persistStore,
     persistReducer,
@@ -15,6 +15,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authReducer } from '../modules/auth/slices';
 import themeReducer from './themeSlice';
 import financeReducer from './financeSlice';
+
+// Define types before persistence to ensure proper typing
+type AuthStateType = ReturnType<typeof authReducer>;
+type ThemeStateType = ReturnType<typeof themeReducer>;
+type FinanceStateType = ReturnType<typeof financeReducer>;
 
 const authPersistConfig = {
     key: 'auth',
@@ -56,8 +61,29 @@ export const store = configureStore({
 export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
+
+export interface TypedRootState {
+    auth: AuthStateType;
+    theme: ThemeStateType;
+    finance: FinanceStateType;
+}
+
+export type RootStateTyped = RootState & TypedRootState;
+
 export type AppDispatch = typeof store.dispatch;
 
-export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
+export type AuthState = AuthStateType;
+export type ThemeState = ThemeStateType;
 
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+
+// Wrapper function that ensures proper type inference by casting the state internally
+export function useAppSelector<TSelected>(
+    selector: (state: TypedRootState) => TSelected,
+    equalityFn?: (left: TSelected, right: TSelected) => boolean,
+): TSelected {
+    return useSelector<RootState, TSelected>(
+        (state) => selector(state as unknown as TypedRootState),
+        equalityFn,
+    );
+}

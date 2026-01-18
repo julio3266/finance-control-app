@@ -25,7 +25,7 @@ export const useFormValidation = <T>(schema: ZodSchema<T>) => {
                 return false;
             }
         },
-        [schema]
+        [schema],
     );
 
     const validateField = useCallback(
@@ -40,9 +40,7 @@ export const useFormValidation = <T>(schema: ZodSchema<T>) => {
                 return undefined;
             } catch (error) {
                 if (error instanceof ZodError) {
-                    const fieldError = error.issues.find(
-                        (err) => err.path[0] === field
-                    );
+                    const fieldError = error.issues.find((err) => err.path[0] === field);
                     if (fieldError) {
                         setErrors((prev) => ({
                             ...prev,
@@ -54,20 +52,23 @@ export const useFormValidation = <T>(schema: ZodSchema<T>) => {
                 return undefined;
             }
         },
-        [schema, values]
+        [schema, values],
     );
 
-    const setValue = useCallback((field: keyof T, value: unknown) => {
-        setValues((prev) => ({ ...prev, [field]: value }));
-      
-        if (errors[field as string]) {
-            setErrors((prev) => {
-                const newErrors = { ...prev };
-                delete newErrors[field as string];
-                return newErrors;
-            });
-        }
-    }, [errors]);
+    const setValue = useCallback(
+        (field: keyof T, value: unknown) => {
+            setValues((prev) => ({ ...prev, [field]: value }));
+
+            if (errors[field as string]) {
+                setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors[field as string];
+                    return newErrors;
+                });
+            }
+        },
+        [errors],
+    );
 
     const setFieldError = useCallback((field: keyof T, error: string) => {
         setErrors((prev) => ({
@@ -81,10 +82,8 @@ export const useFormValidation = <T>(schema: ZodSchema<T>) => {
     }, []);
 
     const getFieldError = useCallback(
-        (field: keyof T): string | undefined => {
-            return errors[field as string];
-        },
-        [errors]
+        (field: keyof T): string | undefined => errors[field as string],
+        [errors],
     );
 
     return {
@@ -98,4 +97,3 @@ export const useFormValidation = <T>(schema: ZodSchema<T>) => {
         getFieldError,
     };
 };
-

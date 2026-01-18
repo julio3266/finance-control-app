@@ -8,15 +8,12 @@ export type ExtractStackParamList = {
 
 const Stack = createNativeStackNavigator<ExtractStackParamList>();
 
-export const ExtractRoutes: React.FC = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-            }}
-        >
-            <Stack.Screen name="Extract" component={ExtractScreen} />
-        </Stack.Navigator>
-    );
-};
-
+export const ExtractRoutes: React.FC = () => (
+    <Stack.Navigator
+        screenOptions={{
+            headerShown: false,
+        }}
+    >
+        <Stack.Screen name="Extract" component={ExtractScreen} />
+    </Stack.Navigator>
+);
