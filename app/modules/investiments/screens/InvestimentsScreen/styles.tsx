@@ -22,4 +22,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             color: theme.foregroundSecondary,
         },
     });
-

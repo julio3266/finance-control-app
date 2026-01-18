@@ -1,13 +1,12 @@
-import { Animated, View } from "react-native"
-import { styles } from "./styles";
-import { useTheme, useThemeMode } from "@app/utils/useTheme";
-import Logo from "@app/assets/images/logo.svg";
+import { Animated, View } from 'react-native';
+import { styles } from './styles';
+import { useTheme, useThemeMode } from '@app/utils/useTheme';
+import Logo from '@app/assets/images/logo.svg';
 
 export interface LoginHeaderProps {
-    slideAnim: Animated.Value
-    fadeAnim: Animated.Value
+    slideAnim: Animated.Value;
+    fadeAnim: Animated.Value;
 }
-
 
 export const LoginHeader: React.FC<LoginHeaderProps> = ({ slideAnim, fadeAnim }) => {
     const theme = useTheme();
@@ -73,14 +72,10 @@ export const LoginHeader: React.FC<LoginHeaderProps> = ({ slideAnim, fadeAnim })
                         <Animated.Text style={screenStyles.subtitleText}>
                             Controle suas{' '}
                         </Animated.Text>
-                        <Animated.Text style={screenStyles.subtitlePurple}>
-                            finanças
-                        </Animated.Text>
+                        <Animated.Text style={screenStyles.subtitlePurple}>finanças</Animated.Text>
                     </View>
                     <View style={screenStyles.subtitleContainer}>
-                        <Animated.Text style={screenStyles.subtitleText}>
-                            e{' '}
-                        </Animated.Text>
+                        <Animated.Text style={screenStyles.subtitleText}>e </Animated.Text>
                         <Animated.Text style={screenStyles.subtitlePurple}>
                             investimentos
                         </Animated.Text>
@@ -88,5 +83,5 @@ export const LoginHeader: React.FC<LoginHeaderProps> = ({ slideAnim, fadeAnim })
                 </Animated.View>
             </View>
         </Animated.View>
-    )
-}
+    );
+};

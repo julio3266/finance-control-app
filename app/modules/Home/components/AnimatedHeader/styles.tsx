@@ -2,9 +2,7 @@ import { useTheme, useThemeMode } from '@app/utils/useTheme';
 import { StyleSheet } from 'react-native';
 import { colors } from '@app/utils/colors';
 
-export const styles = (
-    theme: ReturnType<typeof useTheme>,
-) =>
+export const styles = (theme: ReturnType<typeof useTheme>) =>
     StyleSheet.create({
         wrapper: {
             marginBottom: 0,

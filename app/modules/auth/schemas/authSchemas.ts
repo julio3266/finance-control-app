@@ -1,10 +1,7 @@
 import { z } from 'zod';
 
 export const emailSchema = z.object({
-    email: z
-        .string()
-        .min(1, 'Email é obrigatório')
-        .email('Email inválido'),
+    email: z.string().min(1, 'Email é obrigatório').email('Email inválido'),
 });
 
 export const otpSchema = z.object({
@@ -16,10 +13,7 @@ export const otpSchema = z.object({
 });
 
 export const loginSchema = z.object({
-    email: z
-        .string()
-        .min(1, 'Email é obrigatório')
-        .email('Email inválido'),
+    email: z.string().min(1, 'Email é obrigatório').email('Email inválido'),
     otp: z
         .string()
         .min(1, 'Código é obrigatório')
@@ -30,4 +24,3 @@ export const loginSchema = z.object({
 export type EmailFormData = z.infer<typeof emailSchema>;
 export type OtpFormData = z.infer<typeof otpSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
-

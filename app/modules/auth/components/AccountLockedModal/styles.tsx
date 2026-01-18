@@ -99,4 +99,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             textAlign: 'center',
         },
     });
-

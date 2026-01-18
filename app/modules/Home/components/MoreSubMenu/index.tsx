@@ -24,11 +24,7 @@ const menuItems = [
     { id: 'about', label: 'Sobre', icon: 'ℹ️' },
 ];
 
-export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({
-    isOpen,
-    onClose,
-    onItemPress,
-}) => {
+export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({ isOpen, onClose, onItemPress }) => {
     const theme = useTheme();
     const styled = styles(theme);
     const slideAnim = useRef(new Animated.Value(0)).current;
@@ -74,12 +70,7 @@ export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({
     }
 
     return (
-        <Modal
-            transparent
-            visible={isOpen}
-            animationType="none"
-            onRequestClose={onClose}
-        >
+        <Modal transparent visible={isOpen} animationType="none" onRequestClose={onClose}>
             <TouchableWithoutFeedback onPress={onClose}>
                 <View style={styled.overlay}>
                     <Animated.View
@@ -99,8 +90,7 @@ export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({
                                         style={[
                                             styled.menuItem,
                                             index === 0 && styled.menuItemFirst,
-                                            index === menuItems.length - 1 &&
-                                            styled.menuItemLast,
+                                            index === menuItems.length - 1 && styled.menuItemLast,
                                         ]}
                                         onPress={() => {
                                             onItemPress(item.id);
@@ -108,12 +98,8 @@ export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({
                                         }}
                                         activeOpacity={0.7}
                                     >
-                                        <Text style={styled.menuItemIcon}>
-                                            {item.icon}
-                                        </Text>
-                                        <Text style={styled.menuItemLabel}>
-                                            {item.label}
-                                        </Text>
+                                        <Text style={styled.menuItemIcon}>{item.icon}</Text>
+                                        <Text style={styled.menuItemLabel}>{item.label}</Text>
                                     </TouchableOpacity>
                                 ))}
                             </View>
@@ -124,4 +110,3 @@ export const MoreSubMenu: React.FC<MoreSubMenuProps> = ({
         </Modal>
     );
 };
-

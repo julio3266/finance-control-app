@@ -10,16 +10,10 @@ export default function BudgetScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
                 <Text style={styled.title}>Investimentos</Text>
-                <Text style={styled.subtitle}>
-                    Acompanhe seus investimentos
-                </Text>
+                <Text style={styled.subtitle}>Acompanhe seus investimentos</Text>
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

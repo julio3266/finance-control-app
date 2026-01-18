@@ -10,16 +10,10 @@ export default function ExpensesScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
                 <Text style={styled.title}>Despesas</Text>
-                <Text style={styled.subtitle}>
-                    Adicione e gerencie suas despesas
-                </Text>
+                <Text style={styled.subtitle}>Adicione e gerencie suas despesas</Text>
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

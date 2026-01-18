@@ -18,7 +18,7 @@ module.exports = function (api) {
                         '.ios.tsx',
                     ],
                     alias: {
-                        "assets": "./app/assets",
+                        assets: './app/assets',
                         '@app': './app',
                         '@modules': './app/modules',
                         '@auth': './app/modules/auth',

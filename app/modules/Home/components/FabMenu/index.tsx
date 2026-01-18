@@ -1,11 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Animated,
-    TouchableWithoutFeedback,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Animated, TouchableWithoutFeedback } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { styles } from './styles';
@@ -179,7 +173,11 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                         activeOpacity={0.8}
                     >
                         <View style={styled.iconWrapper}>
-                            <FontAwesome6 name="arrow-trend-up" size={24} color={colors.success[500]} />
+                            <FontAwesome6
+                                name="arrow-trend-up"
+                                size={24}
+                                color={colors.success[500]}
+                            />
                         </View>
                         <Text style={styled.menuText}>Receitas</Text>
                     </TouchableOpacity>
@@ -209,7 +207,11 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                         activeOpacity={0.8}
                     >
                         <View style={styled.iconWrapper}>
-                            <FontAwesome6 name="arrow-trend-down" size={24} color={colors.error[600]} />
+                            <FontAwesome6
+                                name="arrow-trend-down"
+                                size={24}
+                                color={colors.error[600]}
+                            />
                         </View>
                         <Text style={styled.menuText}>Despesas</Text>
                     </TouchableOpacity>
@@ -218,4 +220,3 @@ export const FabMenu: React.FC<FabMenuProps> = ({
         </>
     );
 };
-

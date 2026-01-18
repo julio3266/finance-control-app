@@ -24,10 +24,7 @@ const financeSlice = createSlice({
             state.expenses = action.payload;
             state.balance = state.income - state.expenses;
         },
-        setFinanceData: (
-            state,
-            action: PayloadAction<{ income: number; expenses: number }>
-        ) => {
+        setFinanceData: (state, action: PayloadAction<{ income: number; expenses: number }>) => {
             state.income = action.payload.income;
             state.expenses = action.payload.expenses;
             state.balance = action.payload.income - action.payload.expenses;
@@ -46,4 +43,3 @@ const financeSlice = createSlice({
 export const { setIncome, setExpenses, setFinanceData, addIncome, addExpense } =
     financeSlice.actions;
 export default financeSlice.reducer;
-

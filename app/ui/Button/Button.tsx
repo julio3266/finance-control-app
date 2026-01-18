@@ -1,8 +1,7 @@
-import { useTheme } from "@app/utils/useTheme";
-import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
-import { styles } from "./styles";
-import { Loader } from "../Loader";
-
+import { useTheme } from '@app/utils/useTheme';
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { styles } from './styles';
+import { Loader } from '../Loader';
 
 export interface ButtonProps {
     title: string;
@@ -21,7 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
     icon,
     loading,
     size = 'large',
-    variant = 'primary'
+    variant = 'primary',
 }) => {
     const theme = useTheme();
     const buttonStyles = styles(theme);
@@ -62,7 +61,10 @@ export const Button: React.FC<ButtonProps> = ({
             activeOpacity={0.8}
         >
             {loading ? (
-                <Loader size="small" color={variant === 'primary' ? theme.buttonPrimaryText : theme.foreground} />
+                <Loader
+                    size="small"
+                    color={variant === 'primary' ? theme.buttonPrimaryText : theme.foreground}
+                />
             ) : (
                 <>
                     {icon && <View style={buttonStyles.iconContainer}>{icon}</View>}
@@ -71,4 +73,4 @@ export const Button: React.FC<ButtonProps> = ({
             )}
         </TouchableOpacity>
     );
-}
+};

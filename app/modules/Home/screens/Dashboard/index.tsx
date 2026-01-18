@@ -10,16 +10,10 @@ export default function DashboardScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
                 <Text style={styled.title}>Dashboard</Text>
-                <Text style={styled.subtitle}>
-                    Bem-vindo ao seu painel de controle
-                </Text>
+                <Text style={styled.subtitle}>Bem-vindo ao seu painel de controle</Text>
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

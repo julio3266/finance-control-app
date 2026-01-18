@@ -1,11 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    Animated,
-    Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeMode } from '@app/utils/useTheme';
 import { useAppDispatch } from '@app/store';
@@ -18,9 +12,7 @@ interface AnimatedHeaderProps {
     onProfilePress?: () => void;
 }
 
-export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
-    onProfilePress,
-}) => {
+export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({ onProfilePress }) => {
     const theme = useTheme();
     const themeMode = useThemeMode();
     const dispatch = useAppDispatch();
@@ -68,11 +60,7 @@ export const AnimatedHeader: React.FC<AnimatedHeaderProps> = ({
                         activeOpacity={0.7}
                     >
                         <View style={styled.avatar}>
-                            <Feather
-                                name="user"
-                                size={20}
-                                color={colors.primary[600]}
-                            />
+                            <Feather name="user" size={20} color={colors.primary[600]} />
                         </View>
                     </TouchableOpacity>
                     <View style={styled.titleSection}>

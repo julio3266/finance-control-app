@@ -120,4 +120,3 @@ export const styles = (theme: ReturnType<typeof useTheme>, themeMode: 'light' | 
             borderWidth: 2,
         },
     });
-

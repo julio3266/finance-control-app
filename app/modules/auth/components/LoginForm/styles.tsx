@@ -1,6 +1,6 @@
-import { colors } from "@app/utils/colors";
-import { useTheme } from "@app/utils/useTheme";
-import { StyleSheet } from "react-native";
+import { colors } from '@app/utils/colors';
+import { useTheme } from '@app/utils/useTheme';
+import { StyleSheet } from 'react-native';
 
 export const styles = (theme: ReturnType<typeof useTheme>) =>
     StyleSheet.create({
@@ -58,4 +58,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             textDecorationLine: 'underline',
         },
     });
-

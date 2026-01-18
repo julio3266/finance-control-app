@@ -11,7 +11,7 @@ import { FabMenu } from '../FabMenu';
 
 type TabType = 'Dashboard' | 'Extract' | 'Investiments' | 'More';
 
-interface BottomNavigationBarProps extends BottomTabBarProps { }
+interface BottomNavigationBarProps extends BottomTabBarProps {}
 
 export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
     state,
@@ -23,7 +23,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
     const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
     const fabRotation = useRef(new Animated.Value(0)).current;
 
-    const currentActiveTab = state.routes[state.index]?.name as TabType || 'Dashboard';
+    const currentActiveTab = (state.routes[state.index]?.name as TabType) || 'Dashboard';
 
     const handleFabPress = () => {
         const newState = !isFabMenuOpen;
@@ -50,7 +50,10 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
         outputRange: ['0deg', '45deg'],
     });
 
-    const tabConfig: Record<string, { label: string; iconComponent: React.ComponentType<any>; iconName: string }> = {
+    const tabConfig: Record<
+        string,
+        { label: string; iconComponent: React.ComponentType<any>; iconName: string }
+    > = {
         Dashboard: {
             label: 'Dashboard',
             iconComponent: Feather,
@@ -76,13 +79,13 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
     const renderIcon = (
         IconComponent: React.ComponentType<any>,
         iconName: string,
-        isActive: boolean
+        isActive: boolean,
     ) => {
         const iconColor = isActive ? colors.primary[600] : theme.foregroundMuted;
         return <IconComponent name={iconName} size={24} color={iconColor} />;
     };
 
-    const renderTab = (route: typeof state.routes[0], index: number) => {
+    const renderTab = (route: (typeof state.routes)[0], index: number) => {
         const { options } = descriptors[route.key];
         const isActive = state.index === index;
         const config = tabConfig[route.name];
@@ -111,12 +114,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
                 <View style={styled.iconContainer}>
                     {renderIcon(config.iconComponent, config.iconName, isActive)}
                 </View>
-                <Text
-                    style={[
-                        styled.tabLabel,
-                        isActive && styled.tabLabelActive,
-                    ]}
-                >
+                <Text style={[styled.tabLabel, isActive && styled.tabLabelActive]}>
                     {config.label}
                 </Text>
             </TouchableOpacity>
@@ -166,4 +164,3 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
         </>
     );
 };
-

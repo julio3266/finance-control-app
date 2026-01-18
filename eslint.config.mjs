@@ -14,14 +14,7 @@ const compat = new FlatCompat({
 export default [
     ...compat.extends('universe/native'),
     {
-        ignores: [
-            'android/**',
-            'ios/**',
-            '.config/**',
-            'node_modules/**',
-            'build/**',
-            'dist/**',
-        ],
+        ignores: ['android/**', 'ios/**', '.config/**', 'node_modules/**', 'build/**', 'dist/**'],
     },
     {
         rules: {

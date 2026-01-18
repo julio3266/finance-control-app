@@ -49,9 +49,8 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             width: 36,
             height: 36,
             borderRadius: 18,
-            backgroundColor: theme.background === '#0a0a12'
-                ? colors.primary[900]
-                : colors.primary[50],
+            backgroundColor:
+                theme.background === '#0a0a12' ? colors.primary[900] : colors.primary[50],
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -71,4 +70,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             color: colors.error[600],
         },
     });
-

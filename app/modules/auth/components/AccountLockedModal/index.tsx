@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    Modal,
-    TouchableOpacity,
-    Animated,
-} from 'react-native';
+import { View, Text, Modal, TouchableOpacity, Animated } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { styles } from './styles';
@@ -32,7 +26,7 @@ export const AccountLockedModal: React.FC<AccountLockedModalProps> = ({
             setTimeRemaining(countdownSeconds);
 
             const totalTime = 60;
-            const initialProgress = 1 - (countdownSeconds / totalTime);
+            const initialProgress = 1 - countdownSeconds / totalTime;
             progressAnim.setValue(Math.max(0, Math.min(1, initialProgress)));
 
             const interval = setInterval(() => {
@@ -74,12 +68,7 @@ export const AccountLockedModal: React.FC<AccountLockedModalProps> = ({
     }
 
     return (
-        <Modal
-            visible={isVisible}
-            transparent
-            animationType="fade"
-            onRequestClose={onClose}
-        >
+        <Modal visible={isVisible} transparent animationType="fade" onRequestClose={onClose}>
             <View style={styled.overlay}>
                 <View style={styled.modalContainer}>
                     <View style={styled.header}>
@@ -104,12 +93,7 @@ export const AccountLockedModal: React.FC<AccountLockedModalProps> = ({
                         </View>
 
                         <View style={styled.progressBarContainer}>
-                            <Animated.View
-                                style={[
-                                    styled.progressBar,
-                                    { width: progressWidth },
-                                ]}
-                            />
+                            <Animated.View style={[styled.progressBar, { width: progressWidth }]} />
                         </View>
 
                         <Text style={styled.securityMessage}>
@@ -121,4 +105,3 @@ export const AccountLockedModal: React.FC<AccountLockedModalProps> = ({
         </Modal>
     );
 };
-

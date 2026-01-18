@@ -78,4 +78,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             fontWeight: '300',
         },
     });
-

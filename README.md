@@ -30,32 +30,38 @@ Finance Control App é uma aplicação mobile para gerenciamento financeiro pess
 ## 🛠 Tecnologias
 
 ### Core
+
 - **React Native** 0.81.5
 - **React** 19.1.0
 - **Expo** ~54.0.31
 - **TypeScript** ~5.9.2
 
 ### Navegação
+
 - **@react-navigation/native** ^6.1.18
 - **@react-navigation/bottom-tabs** ^6.6.1
 - **@react-navigation/native-stack** ^6.11.0
 
 ### Estado e Persistência
+
 - **@reduxjs/toolkit** ^2.2.7
 - **react-redux** ^9.2.0
 - **redux-persist** ^6.0.0
 - **@react-native-async-storage/async-storage** 2.2.0
 
 ### UI e Estilização
+
 - **expo-linear-gradient** ^15.0.8
 - **@expo/vector-icons** ^14.0.0
 - **react-native-gesture-handler** ^2.30.0
 - **react-native-svg** ^15.15.1
 
 ### Validação
+
 - **zod** ^4.3.5
 
 ### Desenvolvimento
+
 - **ESLint** ^9.39.2
 - **Prettier** ^3.8.0
 - **Husky** ^9.1.7
@@ -71,22 +77,26 @@ Antes de começar, você precisa ter instalado:
 - **Git**
 
 Para desenvolvimento iOS:
+
 - **Xcode** (macOS apenas)
 - **CocoaPods**
 
 Para desenvolvimento Android:
+
 - **Android Studio**
 - **JDK** 17 ou superior
 
 ## 🚀 Instalação
 
 1. **Clone o repositório**
+
 ```bash
 git clone <repository-url>
 cd finance-control-app
 ```
 
 2. **Instale as dependências**
+
 ```bash
 npm install
 # ou
@@ -94,11 +104,13 @@ yarn install
 ```
 
 3. **Instale as dependências nativas (iOS)**
+
 ```bash
 cd ios && pod install && cd ..
 ```
 
 4. **Configure as variáveis de ambiente**
+
 ```bash
 cp app/utils/env.example.ts app/utils/env.ts
 # Edite app/utils/env.ts com suas configurações
@@ -145,6 +157,7 @@ finance-control-app/
 ## ✨ Funcionalidades
 
 ### Autenticação
+
 - ✅ Login com email e senha
 - ✅ Autenticação OTP (One-Time Password)
 - ✅ Bloqueio de conta após tentativas falhas
@@ -152,30 +165,36 @@ finance-control-app/
 - ✅ Verificação automática de expiração de sessão
 
 ### Dashboard
+
 - ✅ Visualização de balanço geral
 - ✅ Cards de resumo financeiro
 - ✅ Header animado com gradiente
 
 ### Extrato
+
 - ✅ Visualização de transações
 - ✅ Filtro por mês
 - ✅ Cards de saldo atual e mensal
 - ✅ Lista de transações com separadores de data
 
 ### Receitas e Despesas
+
 - ✅ Adição de receitas
 - ✅ Adição de despesas
 - ✅ Acesso via FAB (Floating Action Button)
 
 ### Investimentos
+
 - ✅ Acompanhamento de investimentos
 - ✅ Visualização de portfólio
 
 ### Mais
+
 - ✅ Configurações
 - ✅ Perfil do usuário
 
 ### Temas
+
 - ✅ Modo claro e escuro
 - ✅ Persistência da preferência de tema
 - ✅ Toggle de tema
@@ -188,9 +207,9 @@ Crie um arquivo `app/utils/env.ts` baseado em `app/utils/env.example.ts`:
 
 ```typescript
 export const ENV = {
-  API_URL: 'https://www.api-qa.financecontrolapp.com.br',
-  API_TIMEOUT: 30000,
-  ENV: 'qa',
+    API_URL: 'https://www.api-qa.financecontrolapp.com.br',
+    API_TIMEOUT: 30000,
+    ENV: 'qa',
 };
 ```
 
@@ -226,19 +245,20 @@ O projeto utiliza Redux Persist para manter o estado da aplicação entre reinic
 ### Slices Persistidos
 
 1. **Auth Slice**
-   - Token de autenticação
-   - Email do usuário
-   - Data de expiração
-   - Status de autenticação
-   - Tentativas de OTP
-   - Bloqueio de conta
+    - Token de autenticação
+    - Email do usuário
+    - Data de expiração
+    - Status de autenticação
+    - Tentativas de OTP
+    - Bloqueio de conta
 
 2. **Theme Slice**
-   - Modo do tema (light/dark)
+    - Modo do tema (light/dark)
 
 ### Verificação de Sessão
 
 A aplicação verifica automaticamente se a sessão expirou:
+
 - Ao reidratar o estado
 - A cada minuto durante o uso
 
@@ -247,22 +267,26 @@ A aplicação verifica automaticamente se a sessão expirou:
 A aplicação utiliza React Navigation com a seguinte estrutura:
 
 ### Stack Principal
+
 - **Auth**: Rotas de autenticação
 - **Home**: Rotas principais da aplicação
 
 ### Tab Navigator (Home)
+
 - **Dashboard**: Tela principal
 - **Extract**: Extrato de transações
 - **Investiments**: Investimentos
 - **More**: Configurações e mais opções
 
 ### Rotas Ocultas (via FAB)
+
 - **Expenses**: Adicionar despesas
 - **Incomes**: Adicionar receitas
 
 ### FAB Menu
 
 O Floating Action Button (FAB) central permite:
+
 - Adicionar receitas
 - Adicionar despesas
 
@@ -318,6 +342,7 @@ module-name/
 ### Linting e Formatação
 
 O projeto utiliza:
+
 - **ESLint** para linting
 - **Prettier** para formatação
 - **Husky** para git hooks
@@ -326,6 +351,7 @@ O projeto utiliza:
 ### Git Hooks
 
 Antes de cada commit, o código é automaticamente:
+
 - Lintado com ESLint
 - Formatado com Prettier
 
@@ -365,4 +391,3 @@ Para suporte, entre em contato através do email de suporte ou abra uma issue no
 ---
 
 Desenvolvido com ❤️ usando React Native e Expo
-

@@ -7,11 +7,7 @@ interface MoreIconProps {
     active?: boolean;
 }
 
-export const MoreIcon: React.FC<MoreIconProps> = ({
-    size = 24,
-    color,
-    active = false,
-}) => {
+export const MoreIcon: React.FC<MoreIconProps> = ({ size = 24, color, active = false }) => {
     const dotColor = color || (active ? '#7c3aed' : '#64748b');
 
     return (
@@ -23,4 +19,3 @@ export const MoreIcon: React.FC<MoreIconProps> = ({
         </Svg>
     );
 };
-

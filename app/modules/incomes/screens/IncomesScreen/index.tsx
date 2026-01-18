@@ -10,16 +10,10 @@ export default function IncomesScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
                 <Text style={styled.title}>Receitas</Text>
-                <Text style={styled.subtitle}>
-                    Adicione e gerencie suas receitas
-                </Text>
+                <Text style={styled.subtitle}>Adicione e gerencie suas receitas</Text>
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

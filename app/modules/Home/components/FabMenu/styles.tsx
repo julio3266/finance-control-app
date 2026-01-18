@@ -28,10 +28,8 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             left: '50%',
             marginLeft: -40,
         },
-        menuItemLeft: {
-        },
-        menuItemRight: {
-        },
+        menuItemLeft: {},
+        menuItemRight: {},
         menuButton: {
             alignItems: 'center',
             justifyContent: 'center',
@@ -61,4 +59,3 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             textAlign: 'center',
         },
     });
-

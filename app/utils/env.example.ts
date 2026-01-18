@@ -3,4 +3,3 @@ export const ENV_EXAMPLE = {
     API_TIMEOUT: '30000',
     ENV: 'qa',
 };
-

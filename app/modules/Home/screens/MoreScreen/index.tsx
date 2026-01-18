@@ -10,16 +10,10 @@ export default function MoreScreen() {
 
     return (
         <ScreenWithHeader>
-            <ScrollView
-                style={styled.container}
-                contentContainerStyle={styled.content}
-            >
+            <ScrollView style={styled.container} contentContainerStyle={styled.content}>
                 <Text style={styled.title}>More</Text>
-                <Text style={styled.subtitle}>
-                    Configurações e outras opções
-                </Text>
+                <Text style={styled.subtitle}>Configurações e outras opções</Text>
             </ScrollView>
         </ScreenWithHeader>
     );
 }
-

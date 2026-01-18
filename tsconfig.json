@@ -1,25 +1,25 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
-    "paths": {
-      "@assets/*": ["./app/assets/*"],
-      "@app/*": ["./app/*"],
-      "@modules/*": ["./app/modules/*"],
-      "@auth/*": ["./app/modules/auth/*"]
-    }
-  },
-  "extends": "expo/tsconfig.base",
-  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
+    "compilerOptions": {
+        "strict": true,
+        "strictNullChecks": true,
+        "noImplicitAny": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        "alwaysStrict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "baseUrl": ".",
+        "paths": {
+            "@assets/*": ["./app/assets/*"],
+            "@app/*": ["./app/*"],
+            "@modules/*": ["./app/modules/*"],
+            "@auth/*": ["./app/modules/auth/*"]
+        }
+    },
+    "extends": "expo/tsconfig.base",
+    "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
 }

@@ -14,10 +14,7 @@ interface ScreenWithHeaderProps {
     customHeader?: React.ReactNode;
 }
 
-export const ScreenWithHeader: React.FC<ScreenWithHeaderProps> = ({
-    children,
-    customHeader,
-}) => {
+export const ScreenWithHeader: React.FC<ScreenWithHeaderProps> = ({ children, customHeader }) => {
     const theme = useTheme();
     const styled = styles(theme);
     const navigation = useNavigation<NavigationProp>();
@@ -29,12 +26,7 @@ export const ScreenWithHeader: React.FC<ScreenWithHeaderProps> = ({
     return (
         <View style={[styled.container, { backgroundColor: theme.background }]}>
             {customHeader || <AnimatedHeader onProfilePress={handleProfilePress} />}
-            <View style={[styled.content, { paddingTop: 0 }]}>
-                {children}
-            </View>
+            <View style={[styled.content, { paddingTop: 0 }]}>{children}</View>
         </View>
     );
 };
-
-
-
