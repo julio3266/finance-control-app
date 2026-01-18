@@ -13,8 +13,8 @@ export const sessionStorage = {
     async save(session: SessionData): Promise<void> {
         try {
             await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        } catch (error) {
-            // Error saving session
+        } catch (error: any) {
+            return error;
         }
     },
 
@@ -26,7 +26,6 @@ export const sessionStorage = {
             }
             return null;
         } catch (error) {
-            // Error loading session
             return null;
         }
     },
@@ -34,8 +33,6 @@ export const sessionStorage = {
     async clear(): Promise<void> {
         try {
             await AsyncStorage.removeItem(SESSION_KEY);
-        } catch (error) {
-            // Error clearing session
-        }
+        } catch (error) {}
     },
 };

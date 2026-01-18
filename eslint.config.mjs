@@ -45,7 +45,6 @@ export default [
             'node/prefer-promises/fs': 'off',
             'node/process-exit-as-throw': 'off',
             'node/shebang': 'off',
-            // Disable import ordering and grouping rules
             'import/order': 'off',
             'import/group-exports': 'off',
             'import/newline-after-import': 'off',

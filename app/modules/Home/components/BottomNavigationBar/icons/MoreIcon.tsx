@@ -12,7 +12,6 @@ export const MoreIcon: React.FC<MoreIconProps> = ({ size = 24, color, active = f
 
     return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-            {/* Três pontos horizontais */}
             <Circle cx="6" cy="12" r="2" fill={dotColor} />
             <Circle cx="12" cy="12" r="2" fill={dotColor} />
             <Circle cx="18" cy="12" r="2" fill={dotColor} />

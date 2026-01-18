@@ -31,7 +31,6 @@ export const checkAndLogoutIfExpired = async (): Promise<void> => {
 
     if (isAuthenticated && isSessionExpired(expiresAt)) {
         store.dispatch(logout());
-        // Limpar persist storage
         await persistor.purge();
     }
 };
