@@ -6,24 +6,16 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
     StyleSheet.create({
         wrapper: {
             position: 'relative',
+            zIndex: 1000,
         },
         container: {
             flexDirection: 'row',
-            backgroundColor: theme.backgroundSecondary,
-            borderTopWidth: 1,
-            borderTopColor: theme.border,
+            backgroundColor: theme.background,
+            borderTopWidth: 0,
             paddingTop: 8,
             paddingBottom: 20,
             paddingHorizontal: 0,
             alignItems: 'flex-end',
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: -2,
-            },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 5,
         },
         tab: {
             flex: 1,

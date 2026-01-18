@@ -74,16 +74,18 @@ class ApiClient {
         }
     }
 
-    async post<T>(endpoint: string, data: unknown): Promise<T> {
+    async post<T>(endpoint: string, data: unknown, headers?: Record<string, string>): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: JSON.stringify(data),
+            headers,
         });
     }
 
-    async get<T>(endpoint: string): Promise<T> {
+    async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'GET',
+            headers,
         });
     }
 }

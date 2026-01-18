@@ -1,5 +1,24 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, sendOtp } from './authApi';
+import { loginUser, sendOtp, fetchUserProfile } from './authApi';
+
+interface UserInfo {
+    id: string;
+    email: string;
+    plan: string;
+    role: string;
+    isPremium: boolean;
+    isAdmin: boolean;
+    needsOnboarding: boolean;
+    createdAt: string;
+    userInfo: {
+        firstName: string;
+        lastName: string;
+        address: string;
+        complement: string;
+        phoneNumber: string;
+    } | null;
+    subscription: string | null;
+}
 
 interface AuthState {
     isAuthenticated: boolean;
@@ -8,8 +27,10 @@ interface AuthState {
     email: string | null;
     expiresAt: string | null;
     loading: boolean;
+    profileLoading: boolean;
+    user: UserInfo | null;
     error: string | null;
-    isOnboardingQualified: boolean;
+    needsOnboarding: boolean;
     otpAttempts: number;
     lockUntil: string | null;
 }
@@ -21,8 +42,10 @@ const initialState: AuthState = {
     email: null,
     expiresAt: null,
     loading: false,
+    profileLoading: false,
     error: null,
-    isOnboardingQualified: false,
+    user: null,
+    needsOnboarding: false,
     otpAttempts: 0,
     lockUntil: null,
 };
@@ -50,6 +73,13 @@ const authSlice = createSlice({
             state.error = null;
             state.otpAttempts = 0;
             state.lockUntil = null;
+        },
+        setUserInfo: (state, action: PayloadAction<UserInfo>) => {
+            state.user = action.payload;
+            state.needsOnboarding = action.payload.needsOnboarding;
+        },
+        setNeedsOnboarding: (state, action: PayloadAction<boolean>) => {
+            state.needsOnboarding = action.payload;
         },
         setExpiresAt: (state, action: PayloadAction<string>) => {
             state.expiresAt = action.payload;
@@ -91,21 +121,32 @@ const authSlice = createSlice({
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.isOnboardingQualified = false;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.token = action.payload.token;
                 state.expiresAt = action.payload.expiresAt;
                 state.isAuthenticated = true;
-                state.isOnboardingQualified = action.payload.isOnboardingQualified;
                 state.otpAttempts = 0;
                 state.lockUntil = null;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-                state.isOnboardingQualified = false;
+            });
+        builder
+            .addCase(fetchUserProfile.pending, (state) => {
+                state.profileLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchUserProfile.fulfilled, (state, action) => {
+                state.profileLoading = false;
+                state.user = action.payload;
+                state.needsOnboarding = action.payload.needsOnboarding;
+            })
+            .addCase(fetchUserProfile.rejected, (state, action) => {
+                state.profileLoading = false;
+                state.error = action.payload as string;
             });
     },
 });
@@ -120,5 +161,7 @@ export const {
     incrementOtpAttempts,
     resetOtpAttempts,
     unlockAccount,
+    setUserInfo,
+    setNeedsOnboarding,
 } = authSlice.actions;
 export default authSlice.reducer;

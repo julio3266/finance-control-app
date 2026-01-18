@@ -30,7 +30,7 @@ export const HomeRoutes: React.FC = () => (
             name="Dashboard"
             component={DashboardRoutes}
             options={{
-                tabBarLabel: 'Dashboard',
+                tabBarLabel: 'Home',
             }}
         />
         <Tab.Screen

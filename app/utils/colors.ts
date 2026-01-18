@@ -18,9 +18,11 @@ export const colors = {
         600: '#9333ea',
     },
     success: {
+        50: '#f0fdf4',
         400: '#4ade80',
         500: '#22c55e',
         600: '#16a34a',
+        900: '#14532d',
     },
     warning: {
         400: '#facc15',
@@ -28,9 +30,11 @@ export const colors = {
         600: '#ca8a04',
     },
     error: {
+        50: '#fef2f2',
         400: '#f87171',
         500: '#ef4444',
         600: '#dc2626',
+        900: '#7f1d1d',
     },
     neutral: {
         50: '#f8fafc',

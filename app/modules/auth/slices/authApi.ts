@@ -61,3 +61,45 @@ export const loginUser = createAsyncThunk(
         }
     },
 );
+
+interface UserInfoResponse {
+    id: string;
+    email: string;
+    plan: string;
+    role: string;
+    isPremium: boolean;
+    isAdmin: boolean;
+    needsOnboarding: boolean;
+    createdAt: string;
+    userInfo: {
+        firstName: string;
+        lastName: string;
+        address: string;
+        complement: string;
+        phoneNumber: string;
+    } | null;
+    subscription: string | null;
+}
+
+export const fetchUserProfile = createAsyncThunk(
+    'auth/fetchUserProfile',
+    async (_, { getState, rejectWithValue }) => {
+        try {
+            const state = getState() as { auth: { token: string | null } };
+            const token = state.auth.token;
+
+            if (!token) {
+                return rejectWithValue('Token não encontrado');
+            }
+
+            const response = await apiClient.get<UserInfoResponse>('/api/auth/profile', {
+                Authorization: `Bearer ${token}`,
+            });
+            return response;
+        } catch (error) {
+            const apiError = error as ApiError;
+            const errorMessage = apiError.message || 'Erro ao buscar informações do usuário';
+            return rejectWithValue(errorMessage);
+        }
+    },
+);

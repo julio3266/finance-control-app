@@ -39,7 +39,7 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             width: 56,
             height: 56,
             borderRadius: 28,
-            backgroundColor: theme.backgroundSecondary,
+            backgroundColor: theme.background === '#0a0a12' ? '#1a1a28' : '#e2e8f0',
             justifyContent: 'center',
             alignItems: 'center',
             marginBottom: 8,

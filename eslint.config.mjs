@@ -20,7 +20,7 @@ export default [
         rules: {
             'react-hooks/exhaustive-deps': 'error',
             '@typescript-eslint/no-unused-vars': 'off',
-            indent: ['error', 4],
+            indent: 'off',
             'no-console': 'error',
             'arrow-body-style': ['error', 'as-needed'],
             'node/handle-callback-err': 'off',

@@ -11,14 +11,4 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             padding: 20,
             flexGrow: 1,
         },
-        title: {
-            fontSize: 28,
-            fontWeight: '700',
-            color: theme.foreground,
-            marginBottom: 10,
-        },
-        subtitle: {
-            fontSize: 16,
-            color: theme.foregroundSecondary,
-        },
     });

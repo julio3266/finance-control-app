@@ -15,11 +15,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authReducer } from '../modules/auth/slices';
 import themeReducer from './themeSlice';
 import financeReducer from './financeSlice';
+import { onboardingReducer } from '../modules/onboarding/slices';
 
-// Define types before persistence to ensure proper typing
 type AuthStateType = ReturnType<typeof authReducer>;
 type ThemeStateType = ReturnType<typeof themeReducer>;
 type FinanceStateType = ReturnType<typeof financeReducer>;
+type OnboardingStateType = ReturnType<typeof onboardingReducer>;
 
 const authPersistConfig = {
     key: 'auth',
@@ -29,7 +30,8 @@ const authPersistConfig = {
         'email',
         'expiresAt',
         'isAuthenticated',
-        'isOnboardingQualified',
+        'needsOnboarding',
+        'user',
         'otpAttempts',
         'lockUntil',
     ],
@@ -49,6 +51,7 @@ export const store = configureStore({
         auth: persistedAuthReducer,
         theme: persistedThemeReducer,
         finance: financeReducer,
+        onboarding: onboardingReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -66,6 +69,7 @@ export interface TypedRootState {
     auth: AuthStateType;
     theme: ThemeStateType;
     finance: FinanceStateType;
+    onboarding: OnboardingStateType;
 }
 
 export type RootStateTyped = RootState & TypedRootState;
@@ -77,7 +81,6 @@ export type ThemeState = ThemeStateType;
 
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 
-// Wrapper function that ensures proper type inference by casting the state internally
 export function useAppSelector<TSelected>(
     selector: (state: TypedRootState) => TSelected,
     equalityFn?: (left: TSelected, right: TSelected) => boolean,

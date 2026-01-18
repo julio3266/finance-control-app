@@ -8,22 +8,16 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { styles } from './styles';
 import { FabMenu } from '../FabMenu';
-
-type TabType = 'Dashboard' | 'Extract' | 'Investiments' | 'More';
+import { useDrawer } from '@app/navigation/DrawerNavigation/DrawerContext';
 
 interface BottomNavigationBarProps extends BottomTabBarProps {}
 
-export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
-    state,
-    descriptors,
-    navigation,
-}) => {
+export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state, navigation }) => {
     const theme = useTheme();
     const styled = styles(theme);
     const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
     const fabRotation = useRef(new Animated.Value(0)).current;
-
-    const currentActiveTab = (state.routes[state.index]?.name as TabType) || 'Dashboard';
+    const { isOpen: isDrawerOpen, closeDrawer } = useDrawer();
 
     const handleFabPress = () => {
         const newState = !isFabMenuOpen;
@@ -55,7 +49,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
         { label: string; iconComponent: React.ComponentType<any>; iconName: string }
     > = {
         Dashboard: {
-            label: 'Dashboard',
+            label: 'Home',
             iconComponent: Feather,
             iconName: 'home',
         },
@@ -70,9 +64,9 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
             iconName: 'chart-bar',
         },
         More: {
-            label: 'Mais',
-            iconComponent: Feather,
-            iconName: 'more-horizontal',
+            label: 'Metas',
+            iconComponent: Entypo,
+            iconName: 'bar-graph',
         },
     };
 
@@ -86,20 +80,23 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({
     };
 
     const renderTab = (route: (typeof state.routes)[0], index: number) => {
-        const { options } = descriptors[route.key];
-        const isActive = state.index === index;
+        const isActive = isDrawerOpen ? false : state.index === index;
         const config = tabConfig[route.name];
 
         if (!config) return null;
 
         const handlePress = () => {
+            if (isDrawerOpen) {
+                closeDrawer();
+            }
+
             const event = navigation.emit({
                 type: 'tabPress',
                 target: route.key,
                 canPreventDefault: true,
             });
 
-            if (!isActive && !event.defaultPrevented) {
+            if (!event.defaultPrevented) {
                 navigation.navigate(route.name);
             }
         };
