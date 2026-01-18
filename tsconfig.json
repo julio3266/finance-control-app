@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": ["./app/assets/*"],
+      "@app/*": ["./app/*"],
+      "@modules/*": ["./app/modules/*"],
+      "@auth/*": ["./app/modules/auth/*"]
+    }
+  },
+  "extends": "expo/tsconfig.base",
+  "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"]
+}
