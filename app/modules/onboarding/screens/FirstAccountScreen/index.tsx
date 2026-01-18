@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -14,6 +14,8 @@ import Feather from '@expo/vector-icons/Feather';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { TextInput } from '@app/ui/TextInput';
+import { InstitutionAutocomplete } from '../../components';
+import { Institution } from '../../slices';
 import { styles } from './styles';
 
 interface FirstAccountScreenProps {
@@ -25,6 +27,8 @@ interface FirstAccountScreenProps {
 export interface AccountData {
     name: string;
     institution: string;
+    institutionId?: string;
+    institutionLogo?: string;
     type: AccountType;
     initialBalance: string;
     color: string;
@@ -32,33 +36,39 @@ export interface AccountData {
 
 type AccountType = 'checking' | 'savings' | 'cash' | 'credit' | 'investment' | 'other';
 
-const ACCOUNT_TYPES: { type: AccountType; label: string; icon: React.ReactNode }[] = [
+const ACCOUNT_TYPES: { id: string; type: AccountType; label: string; icon: React.ReactNode }[] = [
     {
+        id: '1',
         type: 'checking',
         label: 'Conta Corrente',
         icon: <FontAwesome5 name="university" size={20} color={colors.primary[400]} />,
     },
     {
+        id: '2',
         type: 'savings',
         label: 'Poupança',
         icon: <FontAwesome5 name="piggy-bank" size={20} color={colors.primary[400]} />,
     },
     {
+        id: '3',
         type: 'cash',
         label: 'Dinheiro',
         icon: <MaterialCommunityIcons name="cash" size={24} color={colors.primary[400]} />,
     },
     {
+        id: '4',
         type: 'credit',
         label: 'Cartão de Crédito',
         icon: <Feather name="credit-card" size={20} color={colors.primary[400]} />,
     },
     {
+        id: '5',
         type: 'investment',
         label: 'Investimento',
         icon: <FontAwesome5 name="chart-line" size={18} color={colors.primary[400]} />,
     },
     {
+        id: '6',
         type: 'other',
         label: 'Outro',
         icon: <Feather name="folder" size={20} color={colors.primary[400]} />,
@@ -74,7 +84,6 @@ const COLORS = [
     '#EF4444',
     '#EC4899',
     '#6366F1',
-    '#8B5CF6',
 ];
 
 export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
@@ -88,15 +97,28 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
 
     const [name, setName] = useState('');
     const [institution, setInstitution] = useState('');
+    const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
     const [type, setType] = useState<AccountType>('checking');
     const [initialBalance, setInitialBalance] = useState('');
     const [color, setColor] = useState(COLORS[0]);
 
     const isValid = name.trim() && institution.trim();
 
+    const handleSelectInstitution = useCallback((inst: Institution) => {
+        setSelectedInstitution(inst);
+    }, []);
+
     const handleFinish = () => {
         if (isValid) {
-            onFinish({ name, institution, type, initialBalance, color });
+            onFinish({
+                name,
+                institution,
+                institutionId: selectedInstitution?.id,
+                institutionLogo: selectedInstitution?.logo || selectedInstitution?.localLogo,
+                type,
+                initialBalance,
+                color,
+            });
         }
     };
 
@@ -143,14 +165,15 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
                         />
                     </View>
 
-                    <View style={styled.inputGroup}>
+                    <View style={[styled.inputGroup, { zIndex: 10 }]}>
                         <Text style={styled.label}>
                             Instituição <Text style={styled.required}>*</Text>
                         </Text>
-                        <TextInput
-                            placeholder="Digite para buscar..."
+                        <InstitutionAutocomplete
                             value={institution}
                             onChangeText={setInstitution}
+                            onSelectInstitution={handleSelectInstitution}
+                            placeholder="Digite para buscar..."
                         />
                     </View>
 

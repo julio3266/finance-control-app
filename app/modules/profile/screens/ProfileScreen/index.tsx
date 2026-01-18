@@ -19,24 +19,28 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, label, onPress, iconBg, isLog
     const theme = useTheme();
     const styled = styles(theme);
 
+    const isDark = theme.background === '#0a0a12';
+    const logoutText = isDark ? '#FFFFFF' : colors.error[600];
+
     return (
         <TouchableOpacity
             style={[
                 styled.menuItem,
-                isLogout && {
-                    backgroundColor: theme.background === '#0a0a12' ? '#1a1a2e' : '#2D1B4E',
-                    borderColor: theme.background === '#0a0a12' ? '#1a1a2e' : '#2D1B4E',
-                },
+                isLogout &&
+                    isDark && {
+                        backgroundColor: '#1a1a2e',
+                        borderColor: '#2a2a3e',
+                    },
             ]}
             onPress={onPress}
             activeOpacity={0.7}
         >
             <View style={[styled.menuIconContainer, { backgroundColor: iconBg }]}>{icon}</View>
-            <Text style={[styled.menuLabel, isLogout && { color: '#FFFFFF' }]}>{label}</Text>
+            <Text style={[styled.menuLabel, isLogout && { color: logoutText }]}>{label}</Text>
             <Feather
                 name="chevron-right"
                 size={20}
-                color={isLogout ? '#FFFFFF' : theme.foregroundMuted}
+                color={isLogout ? logoutText : theme.foregroundMuted}
             />
         </TouchableOpacity>
     );

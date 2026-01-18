@@ -10,6 +10,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { setNeedsOnboarding } from '@app/modules/auth/slices/authSlice';
 import { apiClient } from '@app/utils/api';
+import { AccountType } from '../slices';
 
 export type OnboardingStackParamList = {
     Welcome: undefined;
@@ -43,8 +44,8 @@ export const OnboardingRoutes: React.FC = () => {
                     .filter(Boolean)
                     .join(', ');
 
-                await apiClient.post(
-                    '/api/user/profile',
+                await apiClient.put(
+                    '/api/auth/profile/info',
                     {
                         firstName: personalData.firstName,
                         lastName: personalData.lastName,
@@ -56,12 +57,22 @@ export const OnboardingRoutes: React.FC = () => {
                 );
             }
 
+            const accountTypeMap: Record<string, AccountType> = {
+                checking: 'CHECKING',
+                savings: 'SAVINGS',
+                cash: 'CASH',
+                credit: 'CREDIT',
+                investment: 'INVESTMENT',
+                other: 'OTHER',
+            };
+
             await apiClient.post(
-                '/api/accounts',
+                '/api/finance/accounts',
                 {
                     name: accountData.name,
                     institution: accountData.institution,
-                    type: accountData.type,
+                    institutionLogo: accountData.institutionLogo,
+                    type: accountTypeMap[accountData.type] || 'CHECKING',
                     initialBalance: parseFloat(accountData.initialBalance.replace(',', '.')) || 0,
                     color: accountData.color,
                 },
@@ -70,6 +81,10 @@ export const OnboardingRoutes: React.FC = () => {
 
             dispatch(setNeedsOnboarding(false));
         } catch (error) {
+            if (__DEV__) {
+                // eslint-disable-next-line no-console
+                console.error('Erro ao finalizar onboarding:', error);
+            }
         } finally {
             setLoading(false);
         }
