@@ -26,6 +26,7 @@ export const AppNavigator: React.FC = () => {
     const needsOnboarding = useAppSelector<boolean>(
         (state: RootState) => (state.auth as { needsOnboarding: boolean }).needsOnboarding,
     );
+
     const profileLoading = useAppSelector<boolean>(
         (state: RootState) => (state.auth as { profileLoading: boolean }).profileLoading,
     );

@@ -1,24 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { fetchAddressByCep, CepResponse } from './cepApi';
-import { searchInstitutions, Institution } from './institutionsApi';
+import { searchInstitutions, fetchAllInstitutions, Institution } from './institutionsApi';
 import { updateProfile } from './profileApi';
 import { createAccount, CreateAccountResponse } from './accountsApi';
 
 interface OnboardingState {
-    // CEP
     cepLoading: boolean;
     cepError: string | null;
     address: CepResponse | null;
-    // Institutions
     institutionsLoading: boolean;
     institutionsError: string | null;
     institutions: Institution[];
     selectedInstitution: Institution | null;
-    // Profile
     profileLoading: boolean;
     profileError: string | null;
     profileSuccess: boolean;
-    // Account
     accountLoading: boolean;
     accountError: string | null;
     accountSuccess: boolean;
@@ -26,20 +22,16 @@ interface OnboardingState {
 }
 
 const initialState: OnboardingState = {
-    // CEP
     cepLoading: false,
     cepError: null,
     address: null,
-    // Institutions
     institutionsLoading: false,
     institutionsError: null,
     institutions: [],
     selectedInstitution: null,
-    // Profile
     profileLoading: false,
     profileError: null,
     profileSuccess: false,
-    // Account
     accountLoading: false,
     accountError: null,
     accountSuccess: false,
@@ -95,6 +87,18 @@ const onboardingSlice = createSlice({
                 state.cepLoading = false;
                 state.cepError = action.payload as string;
             })
+            .addCase(fetchAllInstitutions.pending, (state) => {
+                state.institutionsLoading = true;
+                state.institutionsError = null;
+            })
+            .addCase(fetchAllInstitutions.fulfilled, (state, action) => {
+                state.institutionsLoading = false;
+                state.institutions = action.payload.institutions;
+            })
+            .addCase(fetchAllInstitutions.rejected, (state, action) => {
+                state.institutionsLoading = false;
+                state.institutionsError = action.payload as string;
+            })
             .addCase(searchInstitutions.pending, (state) => {
                 state.institutionsLoading = true;
                 state.institutionsError = null;
@@ -107,7 +111,6 @@ const onboardingSlice = createSlice({
                 state.institutionsLoading = false;
                 state.institutionsError = action.payload as string;
             })
-            // Profile
             .addCase(updateProfile.pending, (state) => {
                 state.profileLoading = true;
                 state.profileError = null;
@@ -121,7 +124,6 @@ const onboardingSlice = createSlice({
                 state.profileLoading = false;
                 state.profileError = action.payload as string;
             })
-            // Account
             .addCase(createAccount.pending, (state) => {
                 state.accountLoading = true;
                 state.accountError = null;

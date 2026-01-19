@@ -1,2 +1,2 @@
-export { InstitutionAutocomplete } from './InstitutionAutocomplete';
-export type { default as InstitutionAutocompleteDefault } from './InstitutionAutocomplete';
+export { InstitutionPicker } from './InstitutionPicker';
+export type { default as InstitutionPickerDefault } from './InstitutionPicker';

@@ -17,7 +17,7 @@ interface LoginResponse {
     message: string;
     token: string;
     expiresAt: string;
-    isOnboardingQualified: boolean;
+    needsOnboarding: boolean;
 }
 
 export const sendOtp = createAsyncThunk(
@@ -46,13 +46,12 @@ export const loginUser = createAsyncThunk(
                 email,
                 otp,
             });
-
             dispatch(setOtp(otp));
             dispatch(setEmail(email));
             return {
                 token: response.token,
                 expiresAt: response.expiresAt,
-                isOnboardingQualified: response.isOnboardingQualified,
+                needsOnboarding: response.needsOnboarding,
             };
         } catch (error) {
             const apiError = error as ApiError;

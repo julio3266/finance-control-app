@@ -21,6 +21,22 @@ export interface InstitutionSearchResponse {
     institutions: Institution[];
 }
 
+export const fetchAllInstitutions = createAsyncThunk(
+    'onboarding/fetchAllInstitutions',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await apiClient.get<InstitutionSearchResponse>(
+                '/api/institutions?withLogos=true',
+            );
+            return response;
+        } catch (error) {
+            const apiError = error as ApiError;
+            const errorMessage = apiError.message || 'Erro ao buscar instituições';
+            return rejectWithValue(errorMessage);
+        }
+    },
+);
+
 export const searchInstitutions = createAsyncThunk(
     'onboarding/searchInstitutions',
     async (query: string, { rejectWithValue }) => {

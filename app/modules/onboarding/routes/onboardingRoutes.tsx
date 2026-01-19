@@ -9,6 +9,7 @@ import {
 } from '../screens';
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { setNeedsOnboarding } from '@app/modules/auth/slices/authSlice';
+import { fetchUserProfile } from '@app/modules/auth/slices/authApi';
 import { apiClient } from '@app/utils/api';
 import { AccountType } from '../slices';
 
@@ -78,6 +79,16 @@ export const OnboardingRoutes: React.FC = () => {
                 },
                 getAuthHeaders(),
             );
+
+            try {
+                await apiClient.put(
+                    '/api/auth/profile/onboarding',
+                    { completed: true },
+                    getAuthHeaders(),
+                );
+            } catch {}
+
+            await dispatch(fetchUserProfile()).unwrap();
 
             dispatch(setNeedsOnboarding(false));
         } catch (error) {

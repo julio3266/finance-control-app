@@ -73,6 +73,8 @@ const authSlice = createSlice({
             state.error = null;
             state.otpAttempts = 0;
             state.lockUntil = null;
+            state.user = null;
+            state.needsOnboarding = false;
         },
         setUserInfo: (state, action: PayloadAction<UserInfo>) => {
             state.user = action.payload;
@@ -80,6 +82,9 @@ const authSlice = createSlice({
         },
         setNeedsOnboarding: (state, action: PayloadAction<boolean>) => {
             state.needsOnboarding = action.payload;
+            if (state.user) {
+                state.user.needsOnboarding = action.payload;
+            }
         },
         setExpiresAt: (state, action: PayloadAction<string>) => {
             state.expiresAt = action.payload;
@@ -129,6 +134,7 @@ const authSlice = createSlice({
                 state.isAuthenticated = true;
                 state.otpAttempts = 0;
                 state.lockUntil = null;
+                state.user = null;
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;

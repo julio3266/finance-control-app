@@ -14,7 +14,7 @@ import Feather from '@expo/vector-icons/Feather';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { TextInput } from '@app/ui/TextInput';
-import { InstitutionAutocomplete } from '../../components';
+import { InstitutionPicker } from '../../components';
 import { Institution } from '../../slices';
 import { styles } from './styles';
 
@@ -96,25 +96,24 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
     const insets = useSafeAreaInsets();
 
     const [name, setName] = useState('');
-    const [institution, setInstitution] = useState('');
     const [selectedInstitution, setSelectedInstitution] = useState<Institution | null>(null);
     const [type, setType] = useState<AccountType>('checking');
     const [initialBalance, setInitialBalance] = useState('');
     const [color, setColor] = useState(COLORS[0]);
 
-    const isValid = name.trim() && institution.trim();
+    const isValid = name.trim() && selectedInstitution !== null;
 
     const handleSelectInstitution = useCallback((inst: Institution) => {
         setSelectedInstitution(inst);
     }, []);
 
     const handleFinish = () => {
-        if (isValid) {
+        if (isValid && selectedInstitution) {
             onFinish({
                 name,
-                institution,
-                institutionId: selectedInstitution?.id,
-                institutionLogo: selectedInstitution?.logo || selectedInstitution?.localLogo,
+                institution: selectedInstitution.name,
+                institutionId: selectedInstitution.id,
+                institutionLogo: selectedInstitution.logo || selectedInstitution.localLogo,
                 type,
                 initialBalance,
                 color,
@@ -156,7 +155,7 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
                 <View style={styled.form}>
                     <View style={styled.inputGroup}>
                         <Text style={styled.label}>
-                            Nome da Conta <Text style={styled.required}>*</Text>
+                            Título <Text style={styled.required}>*</Text>
                         </Text>
                         <TextInput
                             placeholder="Ex: Conta Principal, Nubank, etc."
@@ -165,15 +164,14 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
                         />
                     </View>
 
-                    <View style={[styled.inputGroup, { zIndex: 10 }]}>
+                    <View style={styled.inputGroup}>
                         <Text style={styled.label}>
                             Instituição <Text style={styled.required}>*</Text>
                         </Text>
-                        <InstitutionAutocomplete
-                            value={institution}
-                            onChangeText={setInstitution}
-                            onSelectInstitution={handleSelectInstitution}
-                            placeholder="Digite para buscar..."
+                        <InstitutionPicker
+                            value={selectedInstitution}
+                            onSelect={handleSelectInstitution}
+                            placeholder="Selecione uma instituição"
                         />
                     </View>
 

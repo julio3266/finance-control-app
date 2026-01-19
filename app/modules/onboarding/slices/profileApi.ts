@@ -22,7 +22,7 @@ export const updateProfile = createAsyncThunk<
 >('onboarding/updateProfile', async (data, { getState, rejectWithValue }) => {
     try {
         const { auth } = getState();
-        const token = auth.token;
+        const token = (auth as { token: string | null }).token;
 
         if (!token) {
             return rejectWithValue('Token não encontrado');

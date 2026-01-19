@@ -10,7 +10,7 @@ export {
 } from './onboardingSlice';
 export { fetchAddressByCep } from './cepApi';
 export type { CepResponse } from './cepApi';
-export { searchInstitutions } from './institutionsApi';
+export { searchInstitutions, fetchAllInstitutions } from './institutionsApi';
 export type { Institution, InstitutionSearchResponse } from './institutionsApi';
 export { updateProfile } from './profileApi';
 export type { UpdateProfileRequest, UpdateProfileResponse } from './profileApi';
