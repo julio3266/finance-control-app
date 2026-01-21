@@ -1,18 +1,34 @@
 import React from 'react';
 import { View, StyleSheet, Animated, TouchableOpacity, Dimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '@app/utils/useTheme';
 import { HomeRoutes } from '@app/modules/Home/routes';
+import { ExpensesRoutes, ExpensesStackParamList } from '@app/modules/expenses';
+import { IncomesRoutes, IncomesStackParamList } from '@app/modules/incomes';
+import { NewInvestmentRoutes, NewInvestmentStackParamList } from '@app/modules/investiments';
+import { CreditCardRoutes, CreditCardStackParamList } from '@app/modules/credit-card';
+import { OpenFinanceRoutes, OpenFinanceStackParamList } from '@app/modules/open-finance/routes';
+import { SubscriptionRoutes, SubscriptionStackParamList } from '@app/modules/subscription';
 import ProfileScreen from '@app/modules/profile/screens/ProfileScreen';
 import { DrawerProvider, useDrawer } from './DrawerContext';
+
+export type MainStackParamList = {
+    HomeTabs: undefined;
+    Expenses: ExpensesStackParamList;
+    Incomes: IncomesStackParamList;
+    NewInvestment: NewInvestmentStackParamList;
+    CreditCard: CreditCardStackParamList;
+    OpenFinance: OpenFinanceStackParamList;
+    Subscription: SubscriptionStackParamList;
+};
+
+const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 const DrawerContent: React.FC = () => {
     const { isOpen, closeDrawer } = useDrawer();
     const theme = useTheme();
-    const insets = useSafeAreaInsets();
     const slideAnim = React.useRef(new Animated.Value(-Dimensions.get('window').width)).current;
     const [shouldRender, setShouldRender] = React.useState(false);
-    const bottomBarHeight = 8 + 10 + 20 + insets.bottom + 10;
 
     React.useEffect(() => {
         if (isOpen) {
@@ -48,7 +64,7 @@ const DrawerContent: React.FC = () => {
                     {
                         backgroundColor: theme.background,
                         transform: [{ translateX: slideAnim }],
-                        bottom: bottomBarHeight,
+                        height: Dimensions.get('window').height,
                     },
                 ]}
             >
@@ -88,7 +104,20 @@ const styles = StyleSheet.create({
 export const DrawerNavigator: React.FC = () => (
     <DrawerProvider>
         <View style={{ flex: 1 }}>
-            <HomeRoutes />
+            <MainStack.Navigator
+                screenOptions={{
+                    headerShown: false,
+                    animation: 'slide_from_bottom',
+                }}
+            >
+                <MainStack.Screen name="HomeTabs" component={HomeRoutes} />
+                <MainStack.Screen name="Expenses" component={ExpensesRoutes} />
+                <MainStack.Screen name="Incomes" component={IncomesRoutes} />
+                <MainStack.Screen name="NewInvestment" component={NewInvestmentRoutes} />
+                <MainStack.Screen name="CreditCard" component={CreditCardRoutes} />
+                <MainStack.Screen name="OpenFinance" component={OpenFinanceRoutes} />
+                <MainStack.Screen name="Subscription" component={SubscriptionRoutes} />
+            </MainStack.Navigator>
             <DrawerContent />
         </View>
     </DrawerProvider>

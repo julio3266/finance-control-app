@@ -5,9 +5,12 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { store, persistor, useAppSelector, RootState } from './store';
 import { AppNavigator } from './navigation/AppNavigator';
 import { checkAndLogoutIfExpired, isSessionExpired } from './modules/auth/utils/sessionChecker';
+import { ToastProvider, useToast } from './utils/toast';
+import { setToastHandler } from './store/middleware';
 
 function AppContent() {
     const isAuthenticated = useAppSelector<boolean>(
@@ -19,6 +22,11 @@ function AppContent() {
     const themeMode = useAppSelector<'dark' | 'light'>(
         (state: RootState) => (state.theme as { mode: 'dark' | 'light' }).mode,
     );
+    const { showToast } = useToast();
+
+    useEffect(() => {
+        setToastHandler(showToast);
+    }, [showToast]);
 
     useEffect(() => {
         if (isAuthenticated && isSessionExpired(expiresAt)) {
@@ -46,7 +54,11 @@ export default function App() {
     return (
         <Provider store={store}>
             <PersistGate loading={<ActivityIndicator size="large" />} persistor={persistor}>
-                <AppContent />
+                <SafeAreaProvider>
+                    <ToastProvider>
+                        <AppContent />
+                    </ToastProvider>
+                </SafeAreaProvider>
             </PersistGate>
         </Provider>
     );

@@ -38,7 +38,12 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
     const backgroundColor = iconBg || (type === 'income' ? colors.success[50] : colors.error[50]);
 
     return (
-        <View style={[styled.container, { backgroundColor: theme.cardBg }]}>
+        <View
+            style={[
+                styled.container,
+                { backgroundColor: theme.cardBg, borderColor: theme.cardBorder || theme.border },
+            ]}
+        >
             <View style={[styled.iconContainer, { backgroundColor }]}>{defaultIcon}</View>
             <View style={styled.content}>
                 <Text style={styled.description}>{description}</Text>
@@ -65,7 +70,6 @@ const styles = (theme: ReturnType<typeof useTheme>) =>
             borderRadius: 12,
             padding: 12,
             borderWidth: 1,
-            borderColor: theme.cardBorder,
             marginBottom: 8,
         },
         iconContainer: {

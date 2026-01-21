@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { ScreenWithHeader } from '@app/modules/Home/components';
 import { styles } from './styles';

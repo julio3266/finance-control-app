@@ -19,17 +19,21 @@ class ApiClient {
         const endpointPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
         const url = `${baseUrl}${endpointPath}`;
 
+        const method = options.method || 'GET';
+        const headers = {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            ...options.headers,
+        };
+
+        const startTime = Date.now();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
         try {
             const response = await fetch(url, {
-                method: options.method || 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    ...options.headers,
-                },
+                method,
+                headers,
                 body: options.body,
                 signal: controller.signal,
                 cache: 'no-cache',
@@ -37,6 +41,7 @@ class ApiClient {
             });
 
             clearTimeout(timeoutId);
+            const duration = Date.now() - startTime;
 
             if (!response.ok) {
                 let errorData = {};
@@ -45,6 +50,19 @@ class ApiClient {
                 } catch {
                     const text = await response.text().catch(() => '');
                     errorData = text ? { message: text } : {};
+                }
+
+                // Log do erro (apenas em desenvolvimento)
+                if (__DEV__) {
+                    // eslint-disable-next-line no-console
+                    console.error('❌ [API Error]', {
+                        method,
+                        url,
+                        status: response.status,
+                        statusText: response.statusText,
+                        error: errorData,
+                        duration: `${duration}ms`,
+                    });
                 }
 
                 const error: ApiError = {
@@ -57,6 +75,7 @@ class ApiClient {
             }
 
             const data = await response.json();
+
             return data;
         } catch (error) {
             clearTimeout(timeoutId);
@@ -92,6 +111,13 @@ class ApiClient {
         return this.request<T>(endpoint, {
             method: 'PUT',
             body: JSON.stringify(data),
+            headers,
+        });
+    }
+
+    async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'DELETE',
             headers,
         });
     }

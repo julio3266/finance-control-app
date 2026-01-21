@@ -61,7 +61,7 @@ export const lightTheme = {
     border: '#e2e8f0',
     borderFocus: colors.primary[500],
     cardBg: '#ffffff',
-    cardBorder: '#e2e8f0',
+    cardBorder: '#cbd5e1',
     inputBg: '#ffffff',
     inputBorder: '#cbd5e1',
     buttonPrimaryBg: colors.primary[600],

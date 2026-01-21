@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MoreScreen } from '../screens';
 
 export type MoreStackParamList = {
-    More: undefined;
+    MoreMain: undefined;
 };
 
 const Stack = createNativeStackNavigator<MoreStackParamList>();
@@ -14,6 +14,6 @@ export const MoreRoutes: React.FC = () => (
             headerShown: false,
         }}
     >
-        <Stack.Screen name="More" component={MoreScreen} />
+        <Stack.Screen name="MoreMain" component={MoreScreen} />
     </Stack.Navigator>
 );

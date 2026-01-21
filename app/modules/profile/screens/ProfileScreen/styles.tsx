@@ -10,11 +10,21 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
         },
         content: {
             padding: 20,
-            paddingTop: 60,
+            paddingTop: 0,
             paddingBottom: 100,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            paddingBottom: 16,
+        },
+        backButton: {
+            padding: 8,
         },
         profileSection: {
             alignItems: 'center',
+            marginTop: 20,
             marginBottom: 40,
         },
         avatarContainer: {
@@ -51,6 +61,23 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
         email: {
             fontSize: 16,
             color: theme.foregroundMuted,
+        },
+        premiumBadge: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            backgroundColor: '#9333EA20',
+            borderWidth: 1,
+            borderColor: '#9333EA',
+            gap: 6,
+        },
+        premiumText: {
+            fontSize: 12,
+            fontWeight: '600',
+            color: '#9333EA',
         },
         menuSection: {
             gap: 12,

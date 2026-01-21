@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '@app/utils/useTheme';
-import { colors } from '@app/utils/colors';
 import Feather from '@expo/vector-icons/Feather';
 
 interface BalanceCardProps {
@@ -18,8 +16,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
     expenses,
     onMorePress,
 }) => {
-    const theme = useTheme();
-    const styled = styles(theme);
+    const styled = styles();
 
     const gradientColors: [string, string, string] = ['#FF6B6B', '#8B5CF6', '#6C5CE7'];
 
@@ -34,9 +31,6 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                 <View style={styled.header}>
                     <View style={styled.balanceHeader}>
                         <Text style={styled.balanceLabel}>Saldo Total</Text>
-                        <TouchableOpacity activeOpacity={0.7}>
-                            <Feather name="chevron-down" size={20} color="#ffffff" />
-                        </TouchableOpacity>
                     </View>
                     {onMorePress && (
                         <TouchableOpacity onPress={onMorePress} activeOpacity={0.7}>
@@ -48,7 +42,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                 <Text style={styled.balanceValue}>{totalBalance}</Text>
 
                 <View style={styled.footer}>
-                    <View style={styled.footerItem}>
+                    <View style={[styled.footerItem, styled.footerItemFirst]}>
                         <View
                             style={[
                                 styled.iconCircle,
@@ -63,7 +57,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                         </View>
                     </View>
 
-                    <View style={styled.footerItem}>
+                    <View style={[styled.footerItem, styled.footerItemLast]}>
                         <View
                             style={[
                                 styled.iconCircle,
@@ -83,7 +77,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
     );
 };
 
-const styles = (theme: ReturnType<typeof useTheme>) =>
+const styles = () =>
     StyleSheet.create({
         container: {
             marginBottom: 24,
@@ -118,12 +112,20 @@ const styles = (theme: ReturnType<typeof useTheme>) =>
         },
         footer: {
             flexDirection: 'row',
-            gap: 24,
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
         },
         footerItem: {
             flexDirection: 'row',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             gap: 12,
+            flex: 1,
+        },
+        footerItemFirst: {
+            marginRight: 24,
+        },
+        footerItemLast: {
+            marginRight: 0,
         },
         iconCircle: {
             width: 32,
@@ -131,13 +133,16 @@ const styles = (theme: ReturnType<typeof useTheme>) =>
             borderRadius: 16,
             alignItems: 'center',
             justifyContent: 'center',
+            flexShrink: 0,
         },
         footerTextContainer: {
-            gap: 4,
+            flex: 1,
+            minWidth: 0,
         },
         footerLabel: {
             fontSize: 12,
             color: 'rgba(255,255,255,0.8)',
+            marginBottom: 4,
         },
         footerValue: {
             fontSize: 16,

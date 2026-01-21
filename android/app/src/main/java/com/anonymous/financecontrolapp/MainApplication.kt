@@ -1,4 +1,4 @@
-package com.financecontrolapp
+package com.anonymous.financecontrolapp
 
 import android.app.Application
 import android.content.res.Configuration

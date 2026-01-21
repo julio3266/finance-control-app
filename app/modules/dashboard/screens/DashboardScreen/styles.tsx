@@ -11,4 +11,9 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             padding: 20,
             flexGrow: 1,
         },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
     });

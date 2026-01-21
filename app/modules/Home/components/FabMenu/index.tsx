@@ -10,6 +10,8 @@ interface FabMenuProps {
     onClose: () => void;
     onIncomePress: () => void;
     onExpensePress: () => void;
+    onInvestmentPress: () => void;
+    onCreditCardPress: () => void;
 }
 
 export const FabMenu: React.FC<FabMenuProps> = ({
@@ -17,6 +19,8 @@ export const FabMenu: React.FC<FabMenuProps> = ({
     onClose,
     onIncomePress,
     onExpensePress,
+    onInvestmentPress,
+    onCreditCardPress,
 }) => {
     const theme = useTheme();
     const styled = styles(theme);
@@ -24,6 +28,8 @@ export const FabMenu: React.FC<FabMenuProps> = ({
     const opacityAnim = useRef(new Animated.Value(0)).current;
     const incomeTranslateY = useRef(new Animated.Value(0)).current;
     const expenseTranslateY = useRef(new Animated.Value(0)).current;
+    const investmentTranslateY = useRef(new Animated.Value(0)).current;
+    const creditCardTranslateY = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         if (isOpen) {
@@ -53,6 +59,20 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                     friction: 7,
                     delay: 100,
                 }),
+                Animated.spring(investmentTranslateY, {
+                    toValue: 1,
+                    useNativeDriver: true,
+                    tension: 50,
+                    friction: 7,
+                    delay: 150,
+                }),
+                Animated.spring(creditCardTranslateY, {
+                    toValue: 1,
+                    useNativeDriver: true,
+                    tension: 50,
+                    friction: 7,
+                    delay: 200,
+                }),
             ]).start();
         } else {
             Animated.parallel([
@@ -76,9 +96,27 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                     duration: 150,
                     useNativeDriver: true,
                 }),
+                Animated.timing(investmentTranslateY, {
+                    toValue: 0,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(creditCardTranslateY, {
+                    toValue: 0,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
             ]).start();
         }
-    }, [isOpen, scaleAnim, opacityAnim, incomeTranslateY, expenseTranslateY]);
+    }, [
+        isOpen,
+        scaleAnim,
+        opacityAnim,
+        incomeTranslateY,
+        expenseTranslateY,
+        investmentTranslateY,
+        creditCardTranslateY,
+    ]);
 
     const horizontalDistance = 70;
     const verticalOffset = -20;
@@ -113,11 +151,32 @@ export const FabMenu: React.FC<FabMenuProps> = ({
         outputRange: [0, 0, 1],
     });
 
+    const investmentY = investmentTranslateY.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, verticalOffset - 60],
+    });
+
+    const investmentOpacity = investmentTranslateY.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0, 1],
+    });
+
+    const creditCardY = creditCardTranslateY.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, verticalOffset + 30],
+    });
+
+    const creditCardOpacity = creditCardTranslateY.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0, 1],
+    });
+
     const [shouldRender, setShouldRender] = React.useState(false);
 
     React.useEffect(() => {
         if (isOpen) {
             setShouldRender(true);
+            return undefined;
         } else {
             const timer = setTimeout(() => {
                 if (!isOpen) {
@@ -167,8 +226,8 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                     <TouchableOpacity
                         style={styled.menuButton}
                         onPress={() => {
-                            onIncomePress();
                             onClose();
+                            onIncomePress();
                         }}
                         activeOpacity={0.8}
                     >
@@ -201,8 +260,8 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                     <TouchableOpacity
                         style={styled.menuButton}
                         onPress={() => {
-                            onExpensePress();
                             onClose();
+                            onExpensePress();
                         }}
                         activeOpacity={0.8}
                     >
@@ -214,6 +273,58 @@ export const FabMenu: React.FC<FabMenuProps> = ({
                             />
                         </View>
                         <Text style={styled.menuText}>Despesas</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+
+                <Animated.View
+                    style={[
+                        styled.menuItem,
+                        styled.menuItemCenter,
+                        {
+                            transform: [{ translateY: investmentY }, { scale: scaleAnim }],
+                            opacity: investmentOpacity,
+                        },
+                    ]}
+                    pointerEvents={isOpen ? 'auto' : 'none'}
+                >
+                    <TouchableOpacity
+                        style={styled.menuButton}
+                        onPress={() => {
+                            onClose();
+                            onInvestmentPress();
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <View style={styled.iconWrapper}>
+                            <FontAwesome6 name="chart-line" size={24} color={colors.primary[600]} />
+                        </View>
+                        <Text style={styled.menuText}>Investimento</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+
+                <Animated.View
+                    style={[
+                        styled.menuItem,
+                        styled.menuItemCenter,
+                        {
+                            transform: [{ translateY: creditCardY }, { scale: scaleAnim }],
+                            opacity: creditCardOpacity,
+                        },
+                    ]}
+                    pointerEvents={isOpen ? 'auto' : 'none'}
+                >
+                    <TouchableOpacity
+                        style={styled.menuButton}
+                        onPress={() => {
+                            onClose();
+                            onCreditCardPress();
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <View style={styled.iconWrapper}>
+                            <FontAwesome6 name="credit-card" size={24} color="#9333EA" />
+                        </View>
+                        <Text style={styled.menuText}>Cartão</Text>
                     </TouchableOpacity>
                 </Animated.View>
             </View>

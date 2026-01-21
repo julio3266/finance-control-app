@@ -1,23 +1,92 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { IHandles } from 'react-native-modalize/lib/options';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { useAppSelector, useAppDispatch } from '@app/store';
 import { styles } from './styles';
 import { FabMenu } from '../FabMenu';
 import { useDrawer } from '@app/navigation/DrawerNavigation/DrawerContext';
+import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
+import { CreditCardCreationModal } from '@app/modules/credit-card/components/CreditCardCreationModal';
+import { fetchUserProfile } from '@app/modules/profile/slices';
+
+type MainStackNavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
 interface BottomNavigationBarProps extends BottomTabBarProps {}
 
 export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state, navigation }) => {
     const theme = useTheme();
     const styled = styles(theme);
+    const dispatch = useAppDispatch();
     const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
     const fabRotation = useRef(new Animated.Value(0)).current;
+    const creditCardModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
     const { isOpen: isDrawerOpen, closeDrawer } = useDrawer();
+    const parentNavigation = useNavigation<MainStackNavigationProp>();
+    const profile = useAppSelector((state) => state.profile.profile);
+    const profileLoading = useAppSelector((state) => state.profile.loading);
+    const isPremium = profile?.isPremium ?? false;
+
+    // Carregar profile se não estiver carregado
+    useEffect(() => {
+        if (!profile && !profileLoading) {
+            dispatch(fetchUserProfile() as any);
+        }
+    }, [dispatch, profile, profileLoading]);
+
+    const shouldHideBottomBar = React.useMemo(() => {
+        if (isDrawerOpen) {
+            return true;
+        }
+
+        try {
+            const currentTabRoute = state.routes[state.index];
+            if (currentTabRoute?.name === 'Investiments') {
+                const investState = (currentTabRoute as any)?.state;
+                if (investState) {
+                    const investRoute = investState.routes?.[investState.index];
+                    if (investRoute?.name === 'NewInvestment') {
+                        return true;
+                    }
+                }
+            }
+
+            const parentNavState = parentNavigation.getState();
+            if (!parentNavState) return false;
+
+            const parentRoute = parentNavState.routes[parentNavState.index];
+
+            if (parentRoute?.name === 'NewInvestment') {
+                return true;
+            }
+
+            if (parentRoute?.name !== 'HomeTabs') {
+                const nestedState = (parentRoute as any)?.state;
+                if (nestedState) {
+                    const nestedRoute = nestedState.routes?.[nestedState.index];
+                    const routeName = nestedRoute?.name;
+                    if (routeName === 'NewTransaction' || routeName === 'NewInvestment') {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } catch {
+            return false;
+        }
+    }, [state, parentNavigation, isDrawerOpen]);
+
+    if (shouldHideBottomBar) {
+        return null;
+    }
 
     const handleFabPress = () => {
         const newState = !isFabMenuOpen;
@@ -32,11 +101,50 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     };
 
     const handleIncomePress = () => {
-        navigation.navigate('Incomes');
+        parentNavigation.navigate('Incomes', { screen: 'NewTransaction' } as any);
     };
 
     const handleExpensePress = () => {
-        navigation.navigate('Expenses');
+        parentNavigation.navigate('Expenses', { screen: 'NewTransaction' } as any);
+    };
+
+    const handleInvestmentPress = () => {
+        parentNavigation.navigate('NewInvestment', { screen: 'NewInvestment' } as any);
+    };
+
+    const handleCreditCardPress = () => {
+        creditCardModalRef.current?.open();
+    };
+
+    const handleManualCreditCard = () => {
+        parentNavigation.navigate('CreditCard', { screen: 'NewCreditCard' } as any);
+    };
+
+    const handleOpenFinanceCreditCard = () => {
+        // Debug: verificar valores
+        if (__DEV__) {
+            // eslint-disable-next-line no-console
+            console.log('Open Finance Click:', {
+                isPremium,
+                profile: profile ? { isPremium: profile.isPremium, plan: profile.plan } : null,
+                profileLoading,
+            });
+        }
+
+        // Se o profile ainda está carregando, aguardar um pouco
+        if (profileLoading) {
+            // Aguardar o profile carregar antes de decidir
+            return;
+        }
+
+        // Se não há profile ou não é premium, redirecionar para subscription
+        if (!profile || !isPremium) {
+            parentNavigation.navigate('Subscription', { screen: 'Subscription' } as any);
+            return;
+        }
+
+        // Usuário é premium, navegar para Open Finance
+        parentNavigation.navigate('OpenFinance', { screen: 'ConnectAccounts' } as any);
     };
 
     const fabRotate = fabRotation.interpolate({
@@ -157,6 +265,15 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
                 }}
                 onIncomePress={handleIncomePress}
                 onExpensePress={handleExpensePress}
+                onInvestmentPress={handleInvestmentPress}
+                onCreditCardPress={handleCreditCardPress}
+            />
+
+            <CreditCardCreationModal
+                modalizeRef={creditCardModalRef}
+                isPremium={isPremium}
+                onManualPress={handleManualCreditCard}
+                onOpenFinancePress={handleOpenFinanceCreditCard}
             />
         </>
     );

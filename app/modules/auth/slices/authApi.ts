@@ -61,7 +61,7 @@ export const loginUser = createAsyncThunk(
     },
 );
 
-interface UserInfoResponse {
+export interface UserInfoResponse {
     id: string;
     email: string;
     plan: string;
@@ -77,7 +77,11 @@ interface UserInfoResponse {
         complement: string;
         phoneNumber: string;
     } | null;
-    subscription: string | null;
+    subscription: {
+        status: string;
+        currentPeriodEnd: string;
+        cancelAtPeriodEnd: boolean;
+    } | null;
 }
 
 export const fetchUserProfile = createAsyncThunk(

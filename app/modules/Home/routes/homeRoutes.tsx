@@ -1,20 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { DashboardRoutes } from '@app/modules/dashboard';
 import { ExtractRoutes } from '@app/modules/extract';
-import { InvestimentsRoutes } from '@app/modules/investiments';
+import { InvestimentsRoutes, InvestimentsStackParamList } from '@app/modules/investiments';
 import { MoreRoutes } from '@app/modules/more';
-import { ExpensesRoutes } from '@app/modules/expenses';
-import { IncomesRoutes } from '@app/modules/incomes';
 import { BottomNavigationBar } from '../components';
 
 export type HomeTabParamList = {
     Dashboard: undefined;
     Extract: undefined;
-    Investiments: undefined;
+    Investiments: NavigatorScreenParams<InvestimentsStackParamList>;
     More: undefined;
-    Expenses: undefined;
-    Incomes: undefined;
 };
 
 const Tab = createBottomTabNavigator<HomeTabParamList>();
@@ -52,20 +49,6 @@ export const HomeRoutes: React.FC = () => (
             component={MoreRoutes}
             options={{
                 tabBarLabel: 'Mais',
-            }}
-        />
-        <Tab.Screen
-            name="Expenses"
-            component={ExpensesRoutes}
-            options={{
-                tabBarButton: () => null,
-            }}
-        />
-        <Tab.Screen
-            name="Incomes"
-            component={IncomesRoutes}
-            options={{
-                tabBarButton: () => null,
             }}
         />
     </Tab.Navigator>

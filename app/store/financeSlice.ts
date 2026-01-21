@@ -1,15 +1,38 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+    fetchFinanceOverview,
+    fetchRecentTransactions,
+    fetchCategories,
+    type TransactionResponse,
+    type CategoryResponse,
+} from '@app/modules/dashboard/slices/financeApi';
 
 interface FinanceState {
     income: number;
     expenses: number;
     balance: number;
+    loading: boolean;
+    error: string | null;
+    transactions: TransactionResponse[];
+    transactionsLoading: boolean;
+    transactionsError: string | null;
+    categories: CategoryResponse[];
+    categoriesLoading: boolean;
+    categoriesError: string | null;
 }
 
 const initialState: FinanceState = {
-    income: 5000.0,
-    expenses: 3200.0,
-    balance: 1800.0,
+    income: 0,
+    expenses: 0,
+    balance: 0,
+    loading: false,
+    error: null,
+    transactions: [],
+    transactionsLoading: false,
+    transactionsError: null,
+    categories: [],
+    categoriesLoading: false,
+    categoriesError: null,
 };
 
 const financeSlice = createSlice({
@@ -37,6 +60,47 @@ const financeSlice = createSlice({
             state.expenses += action.payload;
             state.balance = state.income - state.expenses;
         },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchFinanceOverview.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchFinanceOverview.fulfilled, (state, action) => {
+                state.loading = false;
+                state.balance = action.payload.totalBalance;
+                state.income = action.payload.totalIncome;
+                state.expenses = action.payload.totalExpenses;
+            })
+            .addCase(fetchFinanceOverview.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Erro ao buscar informações financeiras';
+            })
+            .addCase(fetchRecentTransactions.pending, (state) => {
+                state.transactionsLoading = true;
+                state.transactionsError = null;
+            })
+            .addCase(fetchRecentTransactions.fulfilled, (state, action) => {
+                state.transactionsLoading = false;
+                state.transactions = action.payload;
+            })
+            .addCase(fetchRecentTransactions.rejected, (state, action) => {
+                state.transactionsLoading = false;
+                state.transactionsError = action.payload || 'Erro ao buscar transações recentes';
+            })
+            .addCase(fetchCategories.pending, (state) => {
+                state.categoriesLoading = true;
+                state.categoriesError = null;
+            })
+            .addCase(fetchCategories.fulfilled, (state, action) => {
+                state.categoriesLoading = false;
+                state.categories = action.payload;
+            })
+            .addCase(fetchCategories.rejected, (state, action) => {
+                state.categoriesLoading = false;
+                state.categoriesError = action.payload || 'Erro ao buscar categorias';
+            });
     },
 });
 
