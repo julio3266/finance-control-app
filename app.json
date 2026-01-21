@@ -1,21 +1,19 @@
 {
-  "expo": {
-    "name": "finance-control-app",
-    "slug": "finance-control-app",
-    "version": "1.0.0",
-    "extra": {
-      "API_URL": "https://www.api-qa.financecontrolapp.com.br",
-      "API_TIMEOUT": "30000",
-      "ENV": "qa"
-    },
-    "plugins": [
-      "expo-router"
-    ],
-    "android": {
-      "package": "com.anonymous.financecontrolapp"
-    },
-    "ios": {
-      "bundleIdentifier": "com.anonymous.financecontrolapp"
+    "expo": {
+        "name": "finance-control-app",
+        "slug": "finance-control-app",
+        "version": "1.0.0",
+        "extra": {
+            "API_URL": "https://www.api-qa.financecontrolapp.com.br",
+            "API_TIMEOUT": "30000",
+            "ENV": "qa"
+        },
+        "plugins": ["expo-router"],
+        "android": {
+            "package": "com.anonymous.financecontrolapp"
+        },
+        "ios": {
+            "bundleIdentifier": "com.anonymous.financecontrolapp"
+        }
     }
-  }
 }
