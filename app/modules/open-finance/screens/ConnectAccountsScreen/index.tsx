@@ -10,16 +10,20 @@ import {
 } from 'react-native';
 import { IHandles } from 'react-native-modalize/lib/options';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { fetchConnectors, setSearchQuery, resetConnectors, type Connector } from '../../slices';
+import type { OpenFinanceStackParamList } from '../../routes';
 import { ConnectInstitutionBottomSheet } from '../../components/ConnectInstitutionBottomSheet';
 import { styles } from './styles';
 
 const ITEMS_PER_PAGE = 20;
+
+type ConnectAccountsRouteProp = RouteProp<OpenFinanceStackParamList, 'ConnectAccounts'>;
 
 const formatColor = (color?: string): string => {
     if (!color) return colors.primary[600];
@@ -43,6 +47,7 @@ export const ConnectAccountsScreen: React.FC = () => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const navigation = useNavigation();
+    const route = useRoute<ConnectAccountsRouteProp>();
     const dispatch = useAppDispatch();
     const styled = styles(theme);
 
@@ -58,11 +63,19 @@ export const ConnectAccountsScreen: React.FC = () => {
     const flatListRef = useRef<FlatList>(null);
     const connectInstitutionModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
 
+    const onlyCreditCards = route.params?.onlyCreditCards ?? false;
+
     // Buscar connectors iniciais
     useEffect(() => {
         dispatch(resetConnectors());
-        dispatch(fetchConnectors({ page: 1, pageSize: ITEMS_PER_PAGE }));
-    }, [dispatch]);
+        dispatch(
+            fetchConnectors({
+                page: 1,
+                pageSize: ITEMS_PER_PAGE,
+                onlyCreditCards,
+            }),
+        );
+    }, [dispatch, onlyCreditCards]);
 
     // Debounce para busca
     useEffect(() => {
@@ -73,7 +86,13 @@ export const ConnectAccountsScreen: React.FC = () => {
         if (searchText.trim().length === 0) {
             dispatch(setSearchQuery(''));
             dispatch(resetConnectors());
-            dispatch(fetchConnectors({ page: 1, pageSize: ITEMS_PER_PAGE }));
+            dispatch(
+                fetchConnectors({
+                    page: 1,
+                    pageSize: ITEMS_PER_PAGE,
+                    onlyCreditCards,
+                }),
+            );
             return;
         }
 
@@ -85,7 +104,12 @@ export const ConnectAccountsScreen: React.FC = () => {
             dispatch(setSearchQuery(searchText.trim()));
             dispatch(resetConnectors());
             dispatch(
-                fetchConnectors({ search: searchText.trim(), page: 1, pageSize: ITEMS_PER_PAGE }),
+                fetchConnectors({
+                    search: searchText.trim(),
+                    page: 1,
+                    pageSize: ITEMS_PER_PAGE,
+                    onlyCreditCards,
+                }),
             );
         }, 500);
 
@@ -94,7 +118,7 @@ export const ConnectAccountsScreen: React.FC = () => {
                 clearTimeout(debounceRef.current);
             }
         };
-    }, [searchText, dispatch]);
+    }, [searchText, dispatch, onlyCreditCards]);
 
     const handleLoadMore = useCallback(() => {
         if (!loading && pagination?.hasNextPage) {
@@ -104,14 +128,15 @@ export const ConnectAccountsScreen: React.FC = () => {
                     search: searchQuery || undefined,
                     page: nextPage,
                     pageSize: ITEMS_PER_PAGE,
+                    onlyCreditCards,
                 }),
             );
         }
-    }, [loading, pagination, searchQuery, dispatch]);
+    }, [loading, pagination, searchQuery, dispatch, onlyCreditCards]);
 
     const handleInstitutionPress = (connector: Connector) => {
         setSelectedConnector(connector);
-        connectInstitutionModalRef.current?.open();
+        // O BottomSheet será aberto automaticamente via useEffect quando connector mudar
     };
 
     const handleConnectionSuccess = () => {
@@ -177,7 +202,9 @@ export const ConnectAccountsScreen: React.FC = () => {
     };
 
     const renderEmpty = () => {
-        if (loading) return null;
+        if (loading && connectors.length === 0) {
+            return null;
+        }
         return (
             <View style={styled.emptyContainer}>
                 <Feather name="search" size={48} color={theme.foregroundMuted} />
@@ -189,6 +216,52 @@ export const ConnectAccountsScreen: React.FC = () => {
             </View>
         );
     };
+
+    if (loading && connectors.length === 0) {
+        return (
+            <View style={[styled.container, { paddingTop: insets.top }]}>
+                <View style={styled.header}>
+                    <TouchableOpacity
+                        onPress={handleBack}
+                        style={styled.backButton}
+                        activeOpacity={0.7}
+                    >
+                        <Feather name="arrow-left" size={24} color={theme.foreground} />
+                    </TouchableOpacity>
+                    <Text style={styled.headerTitle}>Conectar contas</Text>
+                    <View style={styled.backButton} />
+                </View>
+
+                <View style={styled.searchContainer}>
+                    <Feather name="search" size={20} color={theme.foregroundMuted} />
+                    <RNTextInput
+                        style={styled.searchInput}
+                        placeholder="Buscar instituição..."
+                        placeholderTextColor={theme.foregroundMuted}
+                        value={searchText}
+                        onChangeText={setSearchText}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                    />
+                    {searchText.length > 0 && (
+                        <TouchableOpacity
+                            onPress={() => {
+                                setSearchText('');
+                                dispatch(setSearchQuery(''));
+                            }}
+                            style={styled.clearButton}
+                        >
+                            <Feather name="x" size={18} color={theme.foregroundMuted} />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                <View style={styled.loadingContainer}>
+                    <ActivityIndicator size="large" color={colors.primary[600]} />
+                </View>
+            </View>
+        );
+    }
 
     return (
         <View style={[styled.container, { paddingTop: insets.top }]}>
@@ -248,6 +321,7 @@ export const ConnectAccountsScreen: React.FC = () => {
                 modalizeRef={connectInstitutionModalRef}
                 connector={selectedConnector}
                 onSuccess={handleConnectionSuccess}
+                onClose={() => setSelectedConnector(null)}
             />
         </View>
     );

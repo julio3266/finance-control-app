@@ -4,7 +4,7 @@ import { ConnectAccountsScreen, ConnectInstitutionScreen } from '../screens';
 import type { Connector } from '../slices';
 
 export type OpenFinanceStackParamList = {
-    ConnectAccounts: undefined;
+    ConnectAccounts: { onlyCreditCards?: boolean } | undefined;
     ConnectInstitution: {
         connector: Connector;
     };

@@ -40,14 +40,22 @@ export interface FetchConnectorsParams {
     search?: string;
     page?: number;
     pageSize?: number;
+    onlyCreditCards?: boolean;
 }
 
 export const fetchConnectors = createAsyncThunk<
     ConnectorsResponse,
     FetchConnectorsParams | void,
-    { rejectValue: string }
->('openFinance/fetchConnectors', async (params, { rejectWithValue }) => {
+    { state: RootState; rejectValue: string }
+>('openFinance/fetchConnectors', async (params, { getState, rejectWithValue }) => {
     try {
+        const { auth } = getState();
+        const token = (auth as { token: string | null }).token;
+
+        if (!token) {
+            return rejectWithValue('Token não encontrado');
+        }
+
         const queryParams = new URLSearchParams();
         if (params?.search) {
             queryParams.append('search', params.search);
@@ -58,9 +66,14 @@ export const fetchConnectors = createAsyncThunk<
         if (params?.pageSize) {
             queryParams.append('pageSize', params.pageSize.toString());
         }
+        if (params?.onlyCreditCards) {
+            queryParams.append('onlyCreditCards', 'true');
+        }
         const queryString = queryParams.toString();
         const endpoint = `/api/bank/connectors${queryString ? `?${queryString}` : ''}`;
-        const response = await apiClient.get<ConnectorsResponse>(endpoint);
+        const response = await apiClient.get<ConnectorsResponse>(endpoint, {
+            Authorization: `Bearer ${token}`,
+        });
         return response;
     } catch (error) {
         const apiError = error as ApiError;
@@ -322,8 +335,6 @@ export const importTransactions = createAsyncThunk<
         return rejectWithValue(errorMessage);
     }
 });
-
-// ==================== Transações Bancárias ====================
 
 export interface BankTransaction {
     id: string;

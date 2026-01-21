@@ -42,10 +42,6 @@ export const fetchAccounts = createAsyncThunk<
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao buscar contas';
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.error('Fetch Accounts Error:', errorMessage, error);
-        }
         return rejectWithValue(errorMessage);
     }
 });

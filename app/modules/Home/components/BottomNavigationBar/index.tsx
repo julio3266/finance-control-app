@@ -34,7 +34,6 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     const profileLoading = useAppSelector((state) => state.profile.loading);
     const isPremium = profile?.isPremium ?? false;
 
-    // Carregar profile se não estiver carregado
     useEffect(() => {
         if (!profile && !profileLoading) {
             dispatch(fetchUserProfile() as any);
@@ -121,30 +120,19 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     };
 
     const handleOpenFinanceCreditCard = () => {
-        // Debug: verificar valores
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.log('Open Finance Click:', {
-                isPremium,
-                profile: profile ? { isPremium: profile.isPremium, plan: profile.plan } : null,
-                profileLoading,
-            });
-        }
-
-        // Se o profile ainda está carregando, aguardar um pouco
         if (profileLoading) {
-            // Aguardar o profile carregar antes de decidir
             return;
         }
 
-        // Se não há profile ou não é premium, redirecionar para subscription
         if (!profile || !isPremium) {
             parentNavigation.navigate('Subscription', { screen: 'Subscription' } as any);
             return;
         }
 
-        // Usuário é premium, navegar para Open Finance
-        parentNavigation.navigate('OpenFinance', { screen: 'ConnectAccounts' } as any);
+        parentNavigation.navigate('OpenFinance', {
+            screen: 'ConnectAccounts',
+            params: { onlyCreditCards: true },
+        } as any);
     };
 
     const fabRotate = fabRotation.interpolate({

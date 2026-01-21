@@ -25,12 +25,14 @@ interface ConnectInstitutionBottomSheetProps {
     modalizeRef: React.RefObject<IHandles>;
     connector: Connector | null;
     onSuccess?: () => void;
+    onClose?: () => void;
 }
 
 export const ConnectInstitutionBottomSheet: React.FC<ConnectInstitutionBottomSheetProps> = ({
     modalizeRef,
     connector,
     onSuccess,
+    onClose,
 }) => {
     const theme = useTheme();
     const insets = useSafeAreaInsets();
@@ -46,17 +48,21 @@ export const ConnectInstitutionBottomSheet: React.FC<ConnectInstitutionBottomShe
     const [step, setStep] = useState<'token' | 'connecting' | 'success'>('token');
     const [showWidget, setShowWidget] = useState(false);
 
-    // Obter token quando o BottomSheet abrir e tiver um connector
+    useEffect(() => {
+        if (connector && modalizeRef.current) {
+            modalizeRef.current.open();
+        }
+    }, [connector, modalizeRef]);
+
     useEffect(() => {
         if (connector) {
             dispatch(fetchConnectToken());
             setStep('token');
             setLogoError(false);
-            setShowWidget(false); // Resetar widget quando mudar de connector
+            setShowWidget(false);
         }
     }, [connector, dispatch]);
 
-    // Quando o token for obtido, avançar para o próximo step
     useEffect(() => {
         if (connectToken && step === 'token') {
             setStep('connecting');
@@ -96,6 +102,11 @@ export const ConnectInstitutionBottomSheet: React.FC<ConnectInstitutionBottomShe
 
     const handlePluggyClose = () => {
         setShowWidget(false);
+
+        modalizeRef.current?.close();
+        if (onClose) {
+            onClose();
+        }
     };
 
     const handleContinue = () => {
@@ -257,8 +268,6 @@ export const ConnectInstitutionBottomSheet: React.FC<ConnectInstitutionBottomShe
         return null;
     };
 
-    if (!connector) return null;
-
     return (
         <Modalize
             ref={modalizeRef}
@@ -266,27 +275,36 @@ export const ConnectInstitutionBottomSheet: React.FC<ConnectInstitutionBottomShe
             modalStyle={styled.bottomSheet}
             handleStyle={styled.handle}
             overlayStyle={styled.overlay}
+            onClosed={() => {
+                setShowWidget(false);
+                if (onClose) {
+                    onClose();
+                }
+            }}
             HeaderComponent={
-                <View style={styled.bottomSheetHeader}>
-                    <Text style={styled.bottomSheetTitle}>
-                        {showWidget ? `Conectar com ${connector.name}` : 'Conectar instituição'}
-                    </Text>
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (showWidget) {
-                                setShowWidget(false);
-                            } else {
+                connector && !showWidget ? (
+                    <View style={styled.bottomSheetHeader}>
+                        <Text style={styled.bottomSheetTitle}>Conectar instituição</Text>
+                        <TouchableOpacity
+                            onPress={() => {
                                 modalizeRef.current?.close();
-                            }
-                        }}
-                        style={styled.bottomSheetCloseButton}
-                    >
-                        <Feather name="x" size={24} color={theme.foreground} />
-                    </TouchableOpacity>
-                </View>
+                                if (onClose) {
+                                    onClose();
+                                }
+                            }}
+                            style={styled.bottomSheetCloseButton}
+                        >
+                            <Feather name="x" size={24} color={theme.foreground} />
+                        </TouchableOpacity>
+                    </View>
+                ) : null
             }
         >
-            {showWidget ? (
+            {!connector ? (
+                <View style={styled.loadingContainer}>
+                    <ActivityIndicator size="large" color={theme.foreground} />
+                </View>
+            ) : showWidget ? (
                 <View style={styled.webViewContainer}>
                     {connectToken && connector ? (
                         <PluggyConnect

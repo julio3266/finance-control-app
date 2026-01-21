@@ -8,32 +8,27 @@ import type { NavigationProp } from '@react-navigation/native';
 import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
 import { ScreenWithHeader } from '@app/modules/Home/components';
 import { formatCurrency } from '@app/utils/formatCurrency';
-import { fetchFinanceOverview, fetchRecentTransactions } from '../../slices/financeApi';
+import { fetchFinanceOverview } from '../../slices/financeApi';
 import {
     CreditCardResponse,
     fetchCreditCards,
     fetchCardBrands,
 } from '@app/modules/credit-card/slices/creditCardApi';
-import { BalanceCard, SectionHeader, TransactionItem, HomeHeader } from '../../components';
+import {
+    BalanceCard,
+    SectionHeader,
+    AccountItem,
+    type UnifiedAccount,
+    HomeHeader,
+} from '../../components';
+import { fetchAccounts } from '@app/modules/accounts/slices/accountsApi';
 import { CardsList, type CreditCard } from '@app/modules/credit-card';
+import {
+    fetchConnections,
+    type BankConnection,
+} from '@app/modules/open-finance/slices/openFinanceApi';
+import type { OverviewConnection } from '../../slices/financeApi';
 import { styles } from './styles';
-
-const formatTransactionDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const transactionDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-    if (transactionDate.getTime() === today.getTime()) {
-        return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    } else if (transactionDate.getTime() === yesterday.getTime()) {
-        return 'Ontem';
-    } else {
-        return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-    }
-};
 
 export default function DashboardScreen() {
     const theme = useTheme();
@@ -44,9 +39,57 @@ export default function DashboardScreen() {
     const balance = useAppSelector((state) => state.finance.balance);
     const income = useAppSelector((state) => state.finance.income);
     const expenses = useAppSelector((state) => state.finance.expenses);
-    const transactions = useAppSelector((state) => state.finance.transactions);
-    const creditCardsResponse = useAppSelector((state) => state.creditCard.cards);
+    const creditCardsFromOverviewRaw = useAppSelector(
+        (state) => (state.finance as any).creditCards?.cards,
+    );
+    const creditCardsFromOverview = useMemo(
+        () => creditCardsFromOverviewRaw || [],
+        [creditCardsFromOverviewRaw],
+    );
+    const creditCardsFromApi = useAppSelector((state) => state.creditCard.cards);
+    const creditCardsResponse =
+        creditCardsFromOverview.length > 0 ? creditCardsFromOverview : creditCardsFromApi;
     const cardBrands = useAppSelector((state) => state.creditCard.brands);
+    const connectionsFromOverviewRaw = useAppSelector(
+        (state) => (state.finance as any).connections,
+    );
+    const connectionsFromOverview = useMemo(
+        () => connectionsFromOverviewRaw || [],
+        [connectionsFromOverviewRaw],
+    );
+    const openFinanceState = useAppSelector((state) => (state as any).openFinance);
+    const accountsFromStoreRaw = useAppSelector((state) => state.accounts.accounts);
+    const accountsFromStore = useMemo(() => accountsFromStoreRaw || [], [accountsFromStoreRaw]);
+
+    let connectionsFromOpenFinance: any[] = [];
+    if (openFinanceState) {
+        if (Array.isArray(openFinanceState.connections)) {
+            connectionsFromOpenFinance = openFinanceState.connections;
+        } else if (
+            openFinanceState.connections &&
+            typeof openFinanceState.connections === 'object' &&
+            'connections' in openFinanceState.connections &&
+            Array.isArray((openFinanceState.connections as any).connections)
+        ) {
+            connectionsFromOpenFinance = (openFinanceState.connections as any).connections;
+        }
+    }
+
+    let finalConnectionsFromOpenFinance = connectionsFromOpenFinance;
+    if (
+        !Array.isArray(connectionsFromOpenFinance) &&
+        connectionsFromOpenFinance &&
+        typeof connectionsFromOpenFinance === 'object' &&
+        'connections' in connectionsFromOpenFinance &&
+        Array.isArray((connectionsFromOpenFinance as any).connections)
+    ) {
+        finalConnectionsFromOpenFinance = (connectionsFromOpenFinance as any).connections;
+    }
+
+    const connectionsRaw =
+        connectionsFromOverview.length > 0
+            ? connectionsFromOverview
+            : finalConnectionsFromOpenFinance;
     const [refreshing, setRefreshing] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
 
@@ -54,11 +97,14 @@ export default function DashboardScreen() {
         const loadInitialData = async () => {
             setInitialLoading(true);
             try {
+                const overviewResult = await dispatch(fetchFinanceOverview() as any).unwrap();
                 await Promise.all([
-                    dispatch(fetchFinanceOverview() as any).unwrap(),
-                    dispatch(fetchRecentTransactions({ limit: 5 }) as any).unwrap(),
                     dispatch(fetchCreditCards() as any).unwrap(),
                     dispatch(fetchCardBrands() as any).unwrap(),
+                    dispatch(fetchAccounts() as any).unwrap(),
+                    ...((overviewResult?.connections?.length || 0) === 0
+                        ? [dispatch(fetchConnections() as any).unwrap()]
+                        : []),
                 ]);
             } catch (err) {
             } finally {
@@ -72,11 +118,14 @@ export default function DashboardScreen() {
     const onRefresh = async () => {
         setRefreshing(true);
         try {
+            const overviewResult = await dispatch(fetchFinanceOverview() as any).unwrap();
             await Promise.all([
-                dispatch(fetchFinanceOverview() as any).unwrap(),
-                dispatch(fetchRecentTransactions({ limit: 5 }) as any).unwrap(),
                 dispatch(fetchCreditCards() as any).unwrap(),
                 dispatch(fetchCardBrands() as any).unwrap(),
+                dispatch(fetchAccounts() as any).unwrap(),
+                ...((overviewResult?.connections?.length || 0) === 0
+                    ? [dispatch(fetchConnections() as any).unwrap()]
+                    : []),
             ]);
         } catch (err) {
         } finally {
@@ -174,46 +223,102 @@ export default function DashboardScreen() {
         }
     };
 
-    const formattedTransactions = useMemo(
-        () =>
-            transactions.map((transaction) => {
-                const type: 'income' | 'expense' =
-                    transaction.type === 'INCOME' ? 'income' : 'expense';
-                const formattedDate = formatTransactionDate(transaction.date);
-                const formattedAmount = formatCurrency(transaction.amount);
-
-                const categoryIcon = transaction.category?.icon || '💸';
-                const iconElement = <Text style={{ fontSize: 16 }}>{categoryIcon}</Text>;
-
+    const connections = useMemo(() => {
+        let connectionsArray: any[] = [];
+        if (Array.isArray(connectionsRaw)) {
+            connectionsArray = connectionsRaw;
+        } else if (
+            connectionsRaw &&
+            typeof connectionsRaw === 'object' &&
+            'connections' in connectionsRaw
+        ) {
+            connectionsArray = Array.isArray((connectionsRaw as any).connections)
+                ? (connectionsRaw as any).connections
+                : [];
+        }
+        return connectionsArray.map((conn) => {
+            if ('institution' in conn && 'logo' in conn) {
+                const overviewConn = conn as OverviewConnection;
                 return {
-                    id: transaction.id,
-                    description: transaction.description,
-                    date: formattedDate,
-                    amount: formattedAmount,
-                    type,
-                    icon: iconElement,
-                };
-            }),
-        [transactions],
-    );
+                    id: overviewConn.id,
+                    pluggyItemId: '',
+                    connectorName: overviewConn.institution,
+                    connectorLogo: overviewConn.logo,
+                    status: overviewConn.status,
+                    lastSyncAt: overviewConn.lastSyncAt,
+                    bankAccounts: [],
+                } as BankConnection;
+            }
 
-    const renderTransaction = ({ item }: { item: (typeof formattedTransactions)[0] }) => (
-        <TransactionItem
-            description={item.description}
-            date={item.date}
-            amount={item.amount}
-            type={item.type}
-            icon={item.icon}
-        />
-    );
+            return conn as BankConnection;
+        });
+    }, [connectionsRaw]);
+
+    const unifiedAccounts = useMemo<UnifiedAccount[]>(() => {
+        const accountsList: UnifiedAccount[] = [];
+
+        accountsFromStore.forEach((account) => {
+            if (account.isActive) {
+                accountsList.push({
+                    id: account.id,
+                    name: account.name,
+                    institution: account.institution,
+                    institutionLogo: account.institutionLogo,
+                    balance: account.currentBalance,
+                    type: account.type,
+                    source: 'manual',
+                    color: account.color,
+                });
+            }
+        });
+
+        connections.forEach((conn) => {
+            const status = conn?.status?.toUpperCase()?.trim();
+            const isActive = status === 'UPDATED' || status === 'PENDING';
+
+            if (isActive && conn.bankAccounts && Array.isArray(conn.bankAccounts)) {
+                conn.bankAccounts.forEach((bankAccount) => {
+                    accountsList.push({
+                        id: bankAccount.id,
+                        name: bankAccount.name,
+                        institution: conn.connectorName,
+                        institutionLogo: conn.connectorLogo,
+                        balance: bankAccount.balance,
+                        type: bankAccount.type,
+                        source: 'openFinance',
+                        connectionId: conn.id,
+                    });
+                });
+            }
+        });
+
+        return accountsList;
+    }, [accountsFromStore, connections]);
+
+    const renderAccount = ({ item }: { item: UnifiedAccount }) => <AccountItem account={item} />;
 
     const ListHeaderComponent = () => (
-        <View>
+        <View style={styled.listHeaderContainer}>
             <BalanceCard
                 totalBalance={formatCurrency(balance)}
                 income={formatCurrency(income)}
                 expenses={formatCurrency(expenses)}
             />
+            {unifiedAccounts.length > 0 && (
+                <SectionHeader
+                    title="Minhas contas"
+                    showSeeAll
+                    showIcon
+                    onSeeAllPress={() => {
+                        // TODO: Navegar para tela de ver todas as contas
+                    }}
+                />
+            )}
+        </View>
+    );
+
+    const ListFooterComponent = () => (
+        <View style={styled.listFooterContainer}>
             <SectionHeader
                 title="Meus cartões"
                 showSeeAll={creditCards.length > 1}
@@ -224,9 +329,6 @@ export default function DashboardScreen() {
                 onAddCard={handleAddCard}
                 onCardPress={handleCardPress}
             />
-            {formattedTransactions.length > 0 && (
-                <SectionHeader title="Transações" showSeeAll={formattedTransactions.length > 5} />
-            )}
         </View>
     );
 
@@ -243,13 +345,19 @@ export default function DashboardScreen() {
     return (
         <ScreenWithHeader customHeader={<HomeHeader />}>
             <FlatList
-                data={formattedTransactions}
-                renderItem={renderTransaction}
+                data={unifiedAccounts}
+                renderItem={renderAccount}
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={ListHeaderComponent}
+                ListFooterComponent={ListFooterComponent}
                 contentContainerStyle={styled.content}
                 style={styled.container}
                 showsVerticalScrollIndicator={false}
+                ListEmptyComponent={
+                    <View style={styled.emptyContainer}>
+                        <Text style={styled.emptyText}>Nenhuma conta cadastrada</Text>
+                    </View>
+                }
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}

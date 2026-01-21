@@ -5,6 +5,8 @@ import {
     fetchCategories,
     type TransactionResponse,
     type CategoryResponse,
+    type FinanceOverviewResponse,
+    type OverviewConnection,
 } from '@app/modules/dashboard/slices/financeApi';
 
 interface FinanceState {
@@ -19,6 +21,8 @@ interface FinanceState {
     categories: CategoryResponse[];
     categoriesLoading: boolean;
     categoriesError: string | null;
+    creditCards?: FinanceOverviewResponse['creditCards'];
+    connections?: OverviewConnection[];
 }
 
 const initialState: FinanceState = {
@@ -72,6 +76,12 @@ const financeSlice = createSlice({
                 state.balance = action.payload.totalBalance;
                 state.income = action.payload.totalIncome;
                 state.expenses = action.payload.totalExpenses;
+                if (action.payload.creditCards) {
+                    state.creditCards = action.payload.creditCards;
+                }
+                if (action.payload.connections) {
+                    state.connections = action.payload.connections;
+                }
             })
             .addCase(fetchFinanceOverview.rejected, (state, action) => {
                 state.loading = false;

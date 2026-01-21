@@ -51,6 +51,7 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
         cardMiniature: {
             marginBottom: 20,
             marginHorizontal: 0,
+            alignItems: 'center',
         },
         billHeader: {
             flexDirection: 'row',

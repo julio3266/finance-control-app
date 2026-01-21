@@ -1,11 +1,30 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient, ApiError } from '@app/utils/api';
 import { RootState } from '@app/store';
+import type { CreditCardResponse } from '@app/modules/credit-card/slices/creditCardApi';
+
+export interface OverviewConnection {
+    id: string;
+    institution: string;
+    logo: string;
+    status: string;
+    lastSyncAt: string | null;
+}
 
 export interface FinanceOverviewResponse {
     totalBalance: number;
     totalIncome: number;
     totalExpenses: number;
+    creditCards?: {
+        cards: CreditCardResponse[];
+        total: number;
+        totalLimit: number;
+        totalUsed: number;
+        totalAvailable: number;
+        totalManual: number;
+        totalOpenFinance: number;
+    };
+    connections?: OverviewConnection[];
 }
 
 export interface TransactionAccount {

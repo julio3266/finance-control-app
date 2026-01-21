@@ -54,6 +54,11 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             paddingHorizontal: 20,
             paddingBottom: 20,
         },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
         institutionItem: {
             flexDirection: 'row',
             alignItems: 'center',

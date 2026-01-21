@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { CreditCardItem } from '../CreditCardItem';
 import { EmptyCard } from '../EmptyCard';
+import { styles } from './styles';
 
 export interface CreditCard {
     id: string;
@@ -52,21 +53,8 @@ export const CardsList: React.FC<CardsListProps> = ({ cards, onCardPress, onAddC
                         onPress={() => onCardPress?.(card)}
                     />
                 ))}
-                {/* Sempre mostra o EmptyCard no final para adicionar novo cartão */}
                 <EmptyCard onAddCard={onAddCard} />
             </ScrollView>
         </View>
     );
 };
-
-const styles = () =>
-    StyleSheet.create({
-        container: {
-            marginBottom: 24,
-        },
-        scrollContent: {
-            paddingLeft: 20,
-            paddingRight: 20,
-            paddingVertical: 4,
-        },
-    });

@@ -112,6 +112,7 @@ export const fetchCreditCards = createAsyncThunk<
                 Authorization: `Bearer ${token}`,
             },
         );
+
         return response;
     } catch (error) {
         const apiError = error as ApiError;

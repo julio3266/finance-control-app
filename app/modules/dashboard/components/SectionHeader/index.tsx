@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
+import { colors } from '@app/utils/colors';
 import Feather from '@expo/vector-icons/Feather';
 
 interface SectionHeaderProps {
@@ -9,6 +10,7 @@ interface SectionHeaderProps {
     showSeeAll?: boolean;
     onAddPress?: () => void;
     showAddButton?: boolean;
+    showIcon?: boolean;
 }
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({
@@ -17,13 +19,19 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
     showSeeAll = true,
     onAddPress,
     showAddButton = false,
+    showIcon = false,
 }) => {
     const theme = useTheme();
     const styled = styles(theme);
 
     return (
         <View style={styled.container}>
-            <Text style={styled.title}>{title}</Text>
+            <View style={styled.leftContainer}>
+                {showIcon && (
+                    <Feather name="wallet" size={20} color={theme.foreground} style={styled.icon} />
+                )}
+                <Text style={styled.title}>{title}</Text>
+            </View>
             <View style={styled.rightContainer}>
                 {showAddButton && onAddPress && (
                     <TouchableOpacity
@@ -31,7 +39,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
                         activeOpacity={0.7}
                         style={styled.addButton}
                     >
-                        <Feather name="plus" size={20} color={theme.foreground} />
+                        <Feather name="plus" size={24} color={colors.success[500]} />
                     </TouchableOpacity>
                 )}
                 {showSeeAll && (
@@ -54,6 +62,14 @@ const styles = (theme: ReturnType<typeof useTheme>) =>
             justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: 16,
+            marginTop: 8,
+        },
+        leftContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        icon: {
+            marginRight: 8,
         },
         title: {
             fontSize: 18,
@@ -75,10 +91,10 @@ const styles = (theme: ReturnType<typeof useTheme>) =>
             gap: 12,
         },
         addButton: {
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            backgroundColor: theme.backgroundTertiary,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: 'transparent',
             alignItems: 'center',
             justifyContent: 'center',
         },

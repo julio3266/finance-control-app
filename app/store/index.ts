@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import {
     persistStore,
     persistReducer,
@@ -104,6 +104,6 @@ export function useAppSelector<TSelected>(
 ): TSelected {
     return useSelector<RootState, TSelected>(
         (state) => selector(state as unknown as TypedRootState),
-        equalityFn,
+        equalityFn || shallowEqual,
     );
 }
