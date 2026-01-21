@@ -28,7 +28,12 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
         <View style={styled.container}>
             <View style={styled.leftContainer}>
                 {showIcon && (
-                    <Feather name="wallet" size={20} color={theme.foreground} style={styled.icon} />
+                    <Feather
+                        name="credit-card"
+                        size={20}
+                        color={theme.foreground}
+                        style={styled.icon}
+                    />
                 )}
                 <Text style={styled.title}>{title}</Text>
             </View>
