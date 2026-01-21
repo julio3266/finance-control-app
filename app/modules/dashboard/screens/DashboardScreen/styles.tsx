@@ -3,6 +3,17 @@ import { StyleSheet } from 'react-native';
 
 export const styles = (theme: ReturnType<typeof useTheme>) =>
     StyleSheet.create({
+        listAccountContainer: {
+            height: 75,
+            justifyContent: 'center',
+            backgroundColor: theme.cardBg,
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 10,
+            marginBottom: 10,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+        },
         container: {
             flex: 1,
             backgroundColor: theme.background,

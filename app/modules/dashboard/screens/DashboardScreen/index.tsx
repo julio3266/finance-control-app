@@ -295,7 +295,11 @@ export default function DashboardScreen() {
         return accountsList;
     }, [accountsFromStore, connections]);
 
-    const renderAccount = ({ item }: { item: UnifiedAccount }) => <AccountItem account={item} />;
+    const renderAccount = ({ item }: { item: UnifiedAccount }) => (
+        <View style={styled.listAccountContainer}>
+            <AccountItem account={item} />
+        </View>
+    );
 
     const ListHeaderComponent = () => (
         <View style={styled.listHeaderContainer}>
