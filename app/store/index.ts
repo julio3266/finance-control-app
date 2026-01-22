@@ -20,6 +20,7 @@ import accountsReducer from '../modules/accounts/slices/accountsSlice';
 import creditCardReducer from '../modules/credit-card/slices/creditCardSlice';
 import { profileReducer } from '../modules/profile/slices';
 import { openFinanceReducer } from '../modules/open-finance/slices';
+import extractReducerDefault from '../modules/extract/slices/extractSlice';
 import { errorMiddleware } from './middleware';
 
 type AuthStateType = ReturnType<typeof authReducer>;
@@ -30,6 +31,7 @@ type AccountsStateType = ReturnType<typeof accountsReducer>;
 type CreditCardStateType = ReturnType<typeof creditCardReducer>;
 type ProfileStateType = ReturnType<typeof profileReducer>;
 type OpenFinanceStateType = ReturnType<typeof openFinanceReducer>;
+type ExtractStateType = ReturnType<typeof extractReducerDefault>;
 
 const authPersistConfig = {
     key: 'auth',
@@ -65,6 +67,7 @@ export const store = configureStore({
         creditCard: creditCardReducer,
         profile: profileReducer,
         openFinance: openFinanceReducer,
+        extract: extractReducerDefault,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -87,6 +90,7 @@ export interface TypedRootState {
     creditCard: CreditCardStateType;
     profile: ProfileStateType;
     openFinance: OpenFinanceStateType;
+    extract: ExtractStateType;
 }
 
 export type RootStateTyped = RootState & TypedRootState;

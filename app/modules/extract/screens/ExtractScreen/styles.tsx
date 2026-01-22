@@ -12,61 +12,110 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             padding: 20,
             flexGrow: 1,
         },
-        monthSelector: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
+        header: {
             marginBottom: 24,
-            gap: 16,
         },
-        monthArrow: {
-            padding: 8,
+        headerTop: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
         },
-        monthText: {
-            fontSize: 18,
-            fontWeight: '600',
+        title: {
+            fontSize: 28,
+            fontWeight: '700',
             color: theme.foreground,
-            minWidth: 100,
-            textAlign: 'center',
         },
-        balanceContainer: {
+        clearButton: {
             flexDirection: 'row',
-            gap: 12,
-            marginBottom: 24,
-        },
-        balanceCard: {
-            flex: 1,
-            flexDirection: 'row',
-            backgroundColor: theme.cardBg,
-            borderRadius: 12,
-            padding: 12,
             alignItems: 'center',
-            gap: 10,
+            gap: 4,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 16,
+            backgroundColor: theme.cardBg,
             borderWidth: 1,
             borderColor: theme.cardBorder,
         },
-        balanceIconContainer: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor:
-                theme.background === '#0a0a12' ? colors.primary[900] : colors.primary[50],
-            alignItems: 'center',
-            justifyContent: 'center',
+        clearButtonText: {
+            fontSize: 12,
+            fontWeight: '600',
+            color: theme.foregroundMuted,
         },
-        balanceContent: {
+        filtersContainer: {
+            gap: 20,
+        },
+        filterSection: {
+            marginBottom: 16,
+        },
+        filterLabel: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.foreground,
+            marginBottom: 8,
+        },
+        accountButton: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 12,
+            borderRadius: 12,
+            backgroundColor: theme.cardBg,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+        },
+        accountButtonText: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.foreground,
             flex: 1,
         },
-        balanceLabel: {
-            fontSize: 11,
-            color: theme.foregroundMuted,
-            marginBottom: 2,
+        accountList: {
+            marginTop: 8,
+            borderRadius: 12,
+            backgroundColor: theme.cardBg,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+            overflow: 'hidden',
         },
-        balanceValue: {
+        accountItem: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.cardBorder,
+        },
+        accountItemText: {
             fontSize: 14,
-            fontWeight: '700',
+            color: theme.foreground,
+            flex: 1,
         },
-        negativeValue: {
-            color: colors.error[600],
+        ofBadge: {
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+            borderRadius: 4,
+            backgroundColor: colors.primary[100],
+        },
+        ofBadgeText: {
+            fontSize: 10,
+            fontWeight: '700',
+            color: colors.primary[700],
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 60,
+        },
+        emptyText: {
+            fontSize: 16,
+            color: theme.foregroundMuted,
+            textAlign: 'center',
+            marginTop: 16,
+        },
+        footerLoader: {
+            paddingVertical: 20,
+            alignItems: 'center',
         },
     });

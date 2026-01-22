@@ -14,14 +14,7 @@ import {
     fetchCreditCards,
     fetchCardBrands,
 } from '@app/modules/credit-card/slices/creditCardApi';
-import {
-    BalanceCard,
-    SectionHeader,
-    AccountItem,
-    type UnifiedAccount,
-    HomeHeader,
-} from '../../components';
-import { fetchAccounts } from '@app/modules/accounts/slices/accountsApi';
+import { BalanceCard, SectionHeader, ConnectionItem, HomeHeader } from '../../components';
 import { CardsList, type CreditCard } from '@app/modules/credit-card';
 import {
     fetchConnections,
@@ -58,8 +51,6 @@ export default function DashboardScreen() {
         [connectionsFromOverviewRaw],
     );
     const openFinanceState = useAppSelector((state) => (state as any).openFinance);
-    const accountsFromStoreRaw = useAppSelector((state) => state.accounts.accounts);
-    const accountsFromStore = useMemo(() => accountsFromStoreRaw || [], [accountsFromStoreRaw]);
 
     let connectionsFromOpenFinance: any[] = [];
     if (openFinanceState) {
@@ -101,7 +92,7 @@ export default function DashboardScreen() {
                 await Promise.all([
                     dispatch(fetchCreditCards() as any).unwrap(),
                     dispatch(fetchCardBrands() as any).unwrap(),
-                    dispatch(fetchAccounts() as any).unwrap(),
+
                     ...((overviewResult?.connections?.length || 0) === 0
                         ? [dispatch(fetchConnections() as any).unwrap()]
                         : []),
@@ -122,7 +113,7 @@ export default function DashboardScreen() {
             await Promise.all([
                 dispatch(fetchCreditCards() as any).unwrap(),
                 dispatch(fetchCardBrands() as any).unwrap(),
-                dispatch(fetchAccounts() as any).unwrap(),
+
                 ...((overviewResult?.connections?.length || 0) === 0
                     ? [dispatch(fetchConnections() as any).unwrap()]
                     : []),
@@ -254,52 +245,18 @@ export default function DashboardScreen() {
         });
     }, [connectionsRaw]);
 
-    const unifiedAccounts = useMemo<UnifiedAccount[]>(() => {
-        const accountsList: UnifiedAccount[] = [];
+    const renderConnection = ({ item }: { item: BankConnection }) => (
+        <ConnectionItem connection={item} />
+    );
 
-        accountsFromStore.forEach((account) => {
-            if (account.isActive) {
-                accountsList.push({
-                    id: account.id,
-                    name: account.name,
-                    institution: account.institution,
-                    institutionLogo: account.institutionLogo,
-                    balance: account.currentBalance,
-                    type: account.type,
-                    source: 'manual',
-                    color: account.color,
-                });
-            }
-        });
-
-        connections.forEach((conn) => {
+    const activeConnections = useMemo(() => {
+        const filtered = connections.filter((conn) => {
             const status = conn?.status?.toUpperCase()?.trim();
             const isActive = status === 'UPDATED' || status === 'PENDING';
-
-            if (isActive && conn.bankAccounts && Array.isArray(conn.bankAccounts)) {
-                conn.bankAccounts.forEach((bankAccount) => {
-                    accountsList.push({
-                        id: bankAccount.id,
-                        name: bankAccount.name,
-                        institution: conn.connectorName,
-                        institutionLogo: conn.connectorLogo,
-                        balance: bankAccount.balance,
-                        type: bankAccount.type,
-                        source: 'openFinance',
-                        connectionId: conn.id,
-                    });
-                });
-            }
+            return isActive;
         });
-
-        return accountsList;
-    }, [accountsFromStore, connections]);
-
-    const renderAccount = ({ item }: { item: UnifiedAccount }) => (
-        <View style={styled.listAccountContainer}>
-            <AccountItem account={item} />
-        </View>
-    );
+        return filtered;
+    }, [connections]);
 
     const ListHeaderComponent = () => (
         <View style={styled.listHeaderContainer}>
@@ -308,21 +265,14 @@ export default function DashboardScreen() {
                 income={formatCurrency(income)}
                 expenses={formatCurrency(expenses)}
             />
-            {unifiedAccounts.length > 0 && (
-                <SectionHeader
-                    title="Minhas contas"
-                    showSeeAll
-                    showIcon
-                    onSeeAllPress={() => {
-                        // TODO: Navegar para tela de ver todas as contas
-                    }}
-                />
+            {activeConnections.length > 0 && (
+                <SectionHeader title="Conexões ativas" showSeeAll={false} />
             )}
         </View>
     );
 
     const ListFooterComponent = () => (
-        <View style={styled.listFooterContainer}>
+        <View style={styled.listHeaderContainer}>
             <SectionHeader
                 title="Meus cartões"
                 showSeeAll={creditCards.length > 1}
@@ -349,8 +299,8 @@ export default function DashboardScreen() {
     return (
         <ScreenWithHeader customHeader={<HomeHeader />}>
             <FlatList
-                data={unifiedAccounts}
-                renderItem={renderAccount}
+                data={activeConnections}
+                renderItem={renderConnection}
                 keyExtractor={(item) => item.id}
                 ListHeaderComponent={ListHeaderComponent}
                 ListFooterComponent={ListFooterComponent}
@@ -359,7 +309,7 @@ export default function DashboardScreen() {
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styled.emptyContainer}>
-                        <Text style={styled.emptyText}>Nenhuma conta cadastrada</Text>
+                        <Text style={styled.emptyText}>Nenhuma conexão ativa</Text>
                     </View>
                 }
                 refreshControl={

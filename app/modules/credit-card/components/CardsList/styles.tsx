@@ -6,8 +6,7 @@ export const styles = () =>
             marginBottom: 24,
         },
         scrollContent: {
-            paddingLeft: 20,
-            paddingRight: 20,
-            paddingVertical: 4,
+            paddingLeft: 0,
+            paddingRight: 0,
         },
     });
