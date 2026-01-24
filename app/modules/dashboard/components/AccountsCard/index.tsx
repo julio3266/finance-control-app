@@ -11,6 +11,7 @@ interface AccountsCardProps {
     onAccountPress?: (account: UnifiedAccount) => void;
     onAddAccount?: () => void;
     maxItems?: number;
+    hideValues?: boolean;
 }
 
 export const AccountsCard: React.FC<AccountsCardProps> = ({
@@ -18,6 +19,7 @@ export const AccountsCard: React.FC<AccountsCardProps> = ({
     onAccountPress,
     onAddAccount,
     maxItems = 5,
+    hideValues = false,
 }) => {
     const theme = useTheme();
     const styled = styles(theme);
@@ -50,6 +52,7 @@ export const AccountsCard: React.FC<AccountsCardProps> = ({
                     <AccountItem
                         account={account}
                         onPress={() => onAccountPress?.(account)}
+                        hideValues={hideValues}
                     />
                     {index < displayedAccounts.length - 1 && <View style={styled.divider} />}
                 </View>

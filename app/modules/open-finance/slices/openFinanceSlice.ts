@@ -159,6 +159,9 @@ const openFinanceSlice = createSlice({
             .addCase(fetchConnections.rejected, (state, action) => {
                 state.connectionsLoading = false;
                 state.connectionsError = action.payload || 'Erro ao buscar conexões';
+                if (__DEV__) {
+                    console.error('❌ [Reducer] fetchConnections.rejected:', action.payload);
+                }
             })
             .addCase(syncConnection.pending, (state) => {
                 state.connectionsLoading = true;

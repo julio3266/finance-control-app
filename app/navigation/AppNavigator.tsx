@@ -74,23 +74,13 @@ export const AppNavigator: React.FC = () => {
 
     const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
 
-    // Handle deep links when app is already open
     useEffect(() => {
         const subscription = Linking.addEventListener('url', ({ url }) => {
-            console.log('🔗 [Navigation] Deep link received:', url);
 
-            // Handle OAuth callback from Open Finance
-            if (url.includes('oauth-callback') || url.includes('open-finance')) {
-                console.log('🔗 [Navigation] Open Finance OAuth callback detected');
-                // The PluggyConnect widget inside ConnectInstitutionScreen will handle this
-            }
         });
 
-        // Check if app was opened via deep link
         Linking.getInitialURL().then((url) => {
-            if (url) {
-                console.log('🔗 [Navigation] App opened with deep link:', url);
-            }
+
         });
 
         return () => {

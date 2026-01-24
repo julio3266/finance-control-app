@@ -3,11 +3,12 @@ import { Text, View, RefreshControl, ActivityIndicator, TouchableOpacity, Scroll
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { useAppSelector, useAppDispatch } from '@app/store';
+import { toggleHideValues } from '@app/store/themeSlice';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
 import { ScreenWithHeader } from '@app/modules/Home/components';
-import { formatCurrency } from '@app/utils/formatCurrency';
+import { formatCurrencyWithHide } from '@app/utils/formatCurrency';
 import { fetchFinanceOverview } from '../../slices/financeApi';
 import {
     CreditCardResponse,
@@ -48,8 +49,13 @@ export default function DashboardScreen() {
     const cardBrands = useAppSelector((state) => state.creditCard.brands);
     const goals = useAppSelector((state) => (state as any).goals.goals || []);
     const unifiedAccountsRaw = useAppSelector((state) => (state as any).accounts?.unifiedAccounts || []);
+    const hideValues = useAppSelector((state) => state.theme.hideValues);
     const [refreshing, setRefreshing] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
+
+    const handleToggleHideValues = () => {
+        dispatch(toggleHideValues());
+    };
 
     useEffect(() => {
         const loadInitialData = async () => {
@@ -310,9 +316,11 @@ export default function DashboardScreen() {
                 }
             >
                 <BalanceCard
-                    totalBalance={formatCurrency(balance)}
-                    income={formatCurrency(income)}
-                    expenses={formatCurrency(expenses)}
+                    totalBalance={formatCurrencyWithHide(balance, hideValues)}
+                    income={formatCurrencyWithHide(income, hideValues)}
+                    expenses={formatCurrencyWithHide(expenses, hideValues)}
+                    hideValues={hideValues}
+                    onToggleHideValues={handleToggleHideValues}
                 />
                 {renderPremiumCard()}
                 <SectionHeader
@@ -325,6 +333,7 @@ export default function DashboardScreen() {
                     onAccountPress={handleAccountPress}
                     onAddAccount={handleAddAccount}
                     maxItems={5}
+                    hideValues={hideValues}
                 />
                 <SectionHeader
                     title="Meus cartões"

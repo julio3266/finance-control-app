@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { SvgCssUri } from 'react-native-svg/css';
-import { formatCurrency } from '@app/utils/formatCurrency';
+import { formatCurrencyWithHide } from '@app/utils/formatCurrency';
 import { styles } from './styles';
 
 export interface UnifiedAccount {
@@ -21,9 +21,10 @@ export interface UnifiedAccount {
 interface AccountItemProps {
     account: UnifiedAccount;
     onPress?: () => void;
+    hideValues?: boolean;
 }
 
-export const AccountItem: React.FC<AccountItemProps> = ({ account, onPress }) => {
+export const AccountItem: React.FC<AccountItemProps> = ({ account, onPress, hideValues = false }) => {
     const theme = useTheme();
     const styled = styles(theme);
 
@@ -85,7 +86,7 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, onPress }) =>
             <View style={styled.balanceContainer}>
                 <Text style={styled.balanceLabel}>Saldo de</Text>
                 <Text style={styled.balanceValue}>
-                    {formatCurrency(parseFloat(account.balance))}
+                    {formatCurrencyWithHide(parseFloat(account.balance), hideValues)}
                 </Text>
             </View>
         </View>

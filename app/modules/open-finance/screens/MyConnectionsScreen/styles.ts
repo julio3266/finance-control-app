@@ -25,6 +25,15 @@ export const styles = (theme: Theme) =>
             fontSize: 18,
             fontWeight: '600',
             color: theme.foreground,
+            flex: 1,
+        },
+        headerActions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        headerActionButton: {
+            padding: 8,
         },
         addButton: {
             padding: 8,
@@ -122,6 +131,51 @@ export const styles = (theme: Theme) =>
         accountsText: {
             fontSize: 13,
             color: theme.foregroundMuted,
+            flex: 1,
+        },
+        accountsList: {
+            marginTop: 12,
+            gap: 8,
+        },
+        accountItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            padding: 12,
+            backgroundColor: theme.muted,
+            borderRadius: 12,
+        },
+        accountItemLast: {
+            marginBottom: 0,
+        },
+        accountIcon: {
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            backgroundColor: `${colors.primary[600]}15`,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        accountDetails: {
+            flex: 1,
+            gap: 2,
+        },
+        accountName: {
+            fontSize: 14,
+            fontWeight: '500',
+            color: theme.foreground,
+        },
+        accountNumber: {
+            fontSize: 12,
+            color: theme.foregroundMuted,
+        },
+        accountBalance: {
+            alignItems: 'flex-end',
+        },
+        accountBalanceValue: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: theme.foreground,
         },
         connectionActions: {
             flexDirection: 'row',

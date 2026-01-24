@@ -73,11 +73,8 @@ export const ConnectInstitutionScreen: React.FC = () => {
         };
 
         const subscription = Linking.addEventListener('url', handleDeepLink);
-
-        // Check if app was opened via deep link while on this screen
         Linking.getInitialURL().then((url) => {
             if (url) {
-                console.log('🔗 [Open Finance] Initial URL:', url);
                 handleDeepLink({ url });
             }
         });
@@ -137,11 +134,8 @@ export const ConnectInstitutionScreen: React.FC = () => {
     };
 
     const handleContinue = () => {
-        // Navigate to Home (Dashboard)
-        (navigation as any).reset({
-            index: 0,
-            routes: [{ name: 'Drawer' }],
-        });
+        // Voltar para a tela de MyConnections para ver a conexão adicionada
+        navigation.navigate('MyConnections' as never);
     };
 
     const formatColor = (color?: string): string => {

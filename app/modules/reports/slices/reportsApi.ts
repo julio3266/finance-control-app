@@ -1,9 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient, type ApiError } from '@app/utils/api';
 
-// ============ TYPES ============
-
-// Monthly Overview Types
 export interface ChartDataPoint {
     month: string;
     income: number;
@@ -28,7 +25,6 @@ export interface MonthlyOverviewResponse {
     chart: ChartDataPoint[];
 }
 
-// Expenses Types
 export interface ExpenseDistributionItem {
     id: string;
     name: string;
@@ -67,7 +63,6 @@ export interface ExpensesResponse {
 
 export type ExpensesViewMode = 'category' | 'card' | 'account';
 
-// Investments Types
 export interface InvestmentSubcategory {
     name: string;
     value: number;
@@ -126,7 +121,6 @@ export type InvestmentsResponse =
 
 export type InvestmentsViewMode = 'allocation' | 'evolution' | 'profitability';
 
-// Income Types
 export interface IncomeDistributionItem {
     id: string;
     name: string;
@@ -168,7 +162,6 @@ export type IncomeResponse =
 
 export type IncomeViewMode = 'category' | 'source' | 'evolution';
 
-// Request params
 export interface ReportPeriodParams {
     month?: number;
     year?: number;
@@ -188,25 +181,24 @@ export interface IncomeParams extends ReportPeriodParams {
     view: IncomeViewMode;
 }
 
-// ============ STATE ============
 
 interface ReportsState {
-    // Monthly Overview
+
     overview: MonthlyOverviewResponse | null;
     overviewLoading: boolean;
     overviewError: string | null;
     
-    // Expenses
+
     expenses: ExpensesResponse | null;
     expensesLoading: boolean;
     expensesError: string | null;
     
-    // Investments
+
     investments: InvestmentsResponse | null;
     investmentsLoading: boolean;
     investmentsError: string | null;
     
-    // Income
+
     income: IncomeResponse | null;
     incomeLoading: boolean;
     incomeError: string | null;
@@ -230,7 +222,6 @@ const initialState: ReportsState = {
     incomeError: null,
 };
 
-// ============ HELPERS ============
 
 const buildQueryString = (params: ReportPeriodParams | ExpensesParams | InvestmentsParams | IncomeParams): string => {
     const entries = Object.entries(params as Record<string, unknown>)
@@ -240,7 +231,6 @@ const buildQueryString = (params: ReportPeriodParams | ExpensesParams | Investme
     return entries.length > 0 ? `?${entries.join('&')}` : '';
 };
 
-// Helper to ensure token is set in apiClient
 const ensureToken = (getState: () => unknown): void => {
     const state = getState() as { auth: { token: string | null } };
     const token = state.auth?.token;
@@ -249,9 +239,6 @@ const ensureToken = (getState: () => unknown): void => {
     }
 };
 
-// ============ ASYNC THUNKS ============
-
-// Fetch Monthly Overview
 export const fetchMonthlyOverview = createAsyncThunk<
     MonthlyOverviewResponse,
     ReportPeriodParams | undefined,
@@ -263,17 +250,8 @@ export const fetchMonthlyOverview = createAsyncThunk<
             ensureToken(getState);
             const queryString = params ? buildQueryString(params) : '';
             const url = `/api/reports/monthly-overview${queryString}`;
-                        https://api.pluggy.ai/oauth/callback?redirect_uri=XXXX
-            if (__DEV__) {
-                console.log('📊 [Monthly Overview API] Request:', { url, params });
-            }
             
-            const response = await apiClient.get<MonthlyOverviewResponse>(url);
-            
-            if (__DEV__) {
-                console.log('📊 [Monthly Overview API] Response:', JSON.stringify(response, null, 2));
-            }
-            
+            const response = await apiClient.get<MonthlyOverviewResponse>(url);   
             return response;
         } catch (error) {
             const apiError = error as ApiError;
@@ -328,7 +306,6 @@ export const fetchInvestments = createAsyncThunk<
     }
 );
 
-// Fetch Income
 export const fetchIncome = createAsyncThunk<
     IncomeResponse,
     IncomeParams,
@@ -349,8 +326,6 @@ export const fetchIncome = createAsyncThunk<
         }
     }
 );
-
-// ============ SLICE ============
 
 const reportsSlice = createSlice({
     name: 'reports',
@@ -384,7 +359,7 @@ const reportsSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        // Monthly Overview
+    
         builder
             .addCase(fetchMonthlyOverview.pending, (state) => {
                 state.overviewLoading = true;
@@ -399,7 +374,7 @@ const reportsSlice = createSlice({
                 state.overviewError = action.payload || 'Erro desconhecido';
             });
 
-        // Expenses
+    
         builder
             .addCase(fetchExpenses.pending, (state) => {
                 state.expensesLoading = true;
@@ -414,7 +389,7 @@ const reportsSlice = createSlice({
                 state.expensesError = action.payload || 'Erro desconhecido';
             });
 
-        // Investments
+    
         builder
             .addCase(fetchInvestments.pending, (state) => {
                 state.investmentsLoading = true;
@@ -429,7 +404,7 @@ const reportsSlice = createSlice({
                 state.investmentsError = action.payload || 'Erro desconhecido';
             });
 
-        // Income
+    
         builder
             .addCase(fetchIncome.pending, (state) => {
                 state.incomeLoading = true;

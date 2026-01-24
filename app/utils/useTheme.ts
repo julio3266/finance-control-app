@@ -1,6 +1,8 @@
 import { useAppSelector } from '../store';
 import { darkTheme, lightTheme, Theme } from './colors';
 
+export type { Theme };
+
 export const useTheme = (): Theme => {
     const themeMode = useAppSelector((state) => state.theme.mode);
     return themeMode === 'dark' ? darkTheme : lightTheme;

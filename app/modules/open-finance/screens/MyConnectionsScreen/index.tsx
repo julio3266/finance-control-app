@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import {
     View,
     Text,
@@ -11,17 +11,21 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { SvgCssUri } from 'react-native-svg/css';
+import { IHandles } from 'react-native-modalize/lib/options';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useTheme } from '@app/utils/useTheme';
 import { useAppDispatch, useAppSelector } from '@app/store';
+import { toggleHideValues } from '@app/store/themeSlice';
 import { colors } from '@app/utils/colors';
+import { formatCurrencyWithHide } from '@app/utils/formatCurrency';
 import {
     fetchConnections,
     deleteConnection,
     syncConnection,
     type BankConnection,
 } from '@app/modules/open-finance/slices';
+import { DeleteConnectionBottomSheet } from '@app/modules/open-finance/components';
 import { styles } from './styles';
 
 export default function MyConnectionsScreen() {
@@ -30,12 +34,17 @@ export default function MyConnectionsScreen() {
     const styled = styles(theme);
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
-
     const { connections, connectionsLoading } = useAppSelector((state) => state.openFinance);
+    const hideValues = useAppSelector((state) => state.theme.hideValues);
     const [refreshing, setRefreshing] = React.useState(false);
+    const [expandedConnections, setExpandedConnections] = useState<Set<string>>(new Set());
+    const [selectedConnection, setSelectedConnection] = useState<BankConnection | null>(null);
+    const [isDeletingConnection, setIsDeletingConnection] = useState(false);
+    const deleteModalRef = useRef<IHandles | null>(null);
 
     useEffect(() => {
-        dispatch(fetchConnections());
+        dispatch(fetchConnections())
+
     }, [dispatch]);
 
     const onRefresh = useCallback(async () => {
@@ -52,35 +61,51 @@ export default function MyConnectionsScreen() {
         (navigation as any).navigate('ConnectAccounts');
     };
 
+    const handleToggleHideValues = () => {
+        dispatch(toggleHideValues());
+    };
+
+    const toggleExpandConnection = (connectionId: string) => {
+        setExpandedConnections((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(connectionId)) {
+                newSet.delete(connectionId);
+            } else {
+                newSet.add(connectionId);
+            }
+            return newSet;
+        });
+    };
+
     const handleSyncConnection = async (connectionId: string) => {
         try {
             await dispatch(syncConnection(connectionId)).unwrap();
-            Alert.alert('Sucesso', 'Sincronização iniciada com sucesso!');
         } catch (error) {
-            Alert.alert('Erro', 'Não foi possível sincronizar a conexão.');
         }
     };
 
     const handleDeleteConnection = (connection: BankConnection) => {
-        Alert.alert(
-            'Remover conexão',
-            `Tem certeza que deseja remover a conexão com ${connection.connectorName}? Isso não removerá as transações já importadas.`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Remover',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await dispatch(deleteConnection(connection.id)).unwrap();
-                            Alert.alert('Sucesso', 'Conexão removida com sucesso!');
-                        } catch (error) {
-                            Alert.alert('Erro', 'Não foi possível remover a conexão.');
-                        }
-                    },
-                },
-            ],
-        );
+        setSelectedConnection(connection);
+        deleteModalRef.current?.open();
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedConnection) return;
+
+        setIsDeletingConnection(true);
+        try {
+            await dispatch(deleteConnection(selectedConnection.id)).unwrap();
+            deleteModalRef.current?.close();
+            Alert.alert('Sucesso', 'Conexão removida com sucesso!');
+        } catch (error) {
+            Alert.alert('Erro', 'Não foi possível remover a conexão.');
+        } finally {
+            setIsDeletingConnection(false);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setSelectedConnection(null);
     };
 
     const getStatusColor = (status: string) => {
@@ -123,76 +148,130 @@ export default function MyConnectionsScreen() {
         return `Última sync: ${date.toLocaleDateString('pt-BR')} às ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
     };
 
-    const renderConnectionItem = ({ item }: { item: BankConnection }) => (
-        <View style={styled.connectionCard}>
-            <View style={styled.connectionHeader}>
-                <View style={styled.logoContainer}>
-                    {item.connectorLogo ? (
-                        <View style={styled.logoWrapper}>
-                            <SvgCssUri
-                                uri={item.connectorLogo}
-                                width={40}
-                                height={40}
-                            />
-                        </View>
-                    ) : (
-                        <View style={styled.logoPlaceholder}>
-                            <Feather name="credit-card" size={24} color={theme.foregroundMuted} />
-                        </View>
-                    )}
-                </View>
-                <View style={styled.connectionInfo}>
-                    <Text style={styled.connectorName}>{item.connectorName}</Text>
-                    <View style={styled.statusRow}>
-                        <View
-                            style={[
-                                styled.statusDot,
-                                { backgroundColor: getStatusColor(item.status) },
-                            ]}
-                        />
-                        <Text
-                            style={[
-                                styled.statusText,
-                                { color: getStatusColor(item.status) },
-                            ]}
-                        >
-                            {getStatusText(item.status)}
-                        </Text>
+    const renderConnectionItem = ({ item }: { item: BankConnection }) => {
+        const isExpanded = expandedConnections.has(item.id);
+        const accountsCount = item._count?.bankAccounts || item.bankAccounts?.length || 0;
+
+        return (
+            <View style={styled.connectionCard}>
+                <View style={styled.connectionHeader}>
+                    <View style={styled.logoContainer}>
+                        {item.connectorLogo ? (
+                            <View style={styled.logoWrapper}>
+                                <SvgCssUri
+                                    uri={item.connectorLogo}
+                                    width={40}
+                                    height={40}
+                                />
+                            </View>
+                        ) : (
+                            <View style={styled.logoPlaceholder}>
+                                <Feather name="credit-card" size={24} color={theme.foregroundMuted} />
+                            </View>
+                        )}
                     </View>
-                    <Text style={styled.lastSync}>{formatLastSync(item.lastSyncAt)}</Text>
+                    <View style={styled.connectionInfo}>
+                        <Text style={styled.connectorName}>{item.connectorName}</Text>
+                        <View style={styled.statusRow}>
+                            <View
+                                style={[
+                                    styled.statusDot,
+                                    { backgroundColor: getStatusColor(item.status) },
+                                ]}
+                            />
+                            <Text
+                                style={[
+                                    styled.statusText,
+                                    { color: getStatusColor(item.status) },
+                                ]}
+                            >
+                                {getStatusText(item.status)}
+                            </Text>
+                        </View>
+                        <Text style={styled.lastSync}>{formatLastSync(item.lastSyncAt)}</Text>
+                    </View>
+                </View>
+
+                {/* Contas bancárias */}
+                {accountsCount > 0 && (
+                    <TouchableOpacity
+                        style={styled.accountsInfo}
+                        onPress={() => toggleExpandConnection(item.id)}
+                        activeOpacity={0.7}
+                    >
+                        <Feather name="layers" size={14} color={theme.foregroundMuted} />
+                        <Text style={styled.accountsText}>
+                            {accountsCount} conta(s) vinculada(s)
+                        </Text>
+                        <Feather
+                            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                            size={16}
+                            color={theme.foregroundMuted}
+                            style={{ marginLeft: 'auto' }}
+                        />
+                    </TouchableOpacity>
+                )}
+
+                {/* Lista de contas expandida */}
+                {isExpanded && item.bankAccounts && item.bankAccounts.length > 0 && (
+                    <View style={styled.accountsList}>
+                        {item.bankAccounts.map((account, index) => (
+                            <View
+                                key={account.id}
+                                style={[
+                                    styled.accountItem,
+                                    index === item.bankAccounts!.length - 1 && styled.accountItemLast,
+                                ]}
+                            >
+                                <View style={styled.accountIcon}>
+                                    <Feather
+                                        name={account.type === 'CREDIT' ? 'credit-card' : 'dollar-sign'}
+                                        size={16}
+                                        color={colors.primary[600]}
+                                    />
+                                </View>
+                                <View style={styled.accountDetails}>
+                                    <Text style={styled.accountName}>{account.name}</Text>
+                                    {account.number && (
+                                        <Text style={styled.accountNumber}>
+                                            {account.type === 'CREDIT' ? 'Cartão' : 'Conta'} {account.number}
+                                        </Text>
+                                    )}
+                                </View>
+                                <View style={styled.accountBalance}>
+                                    <Text style={styled.accountBalanceValue}>
+                                        {formatCurrencyWithHide(account.balance, hideValues)}
+                                    </Text>
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+                <View style={styled.connectionActions}>
+                    <TouchableOpacity
+                        style={styled.actionButton}
+                        onPress={() => handleSyncConnection(item.id)}
+                        activeOpacity={0.7}
+                    >
+                        <Feather name="refresh-cw" size={18} color={colors.primary[600]} />
+                        <Text style={styled.actionButtonText}>Sincronizar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styled.actionButton, styled.deleteButton]}
+                        onPress={() => handleDeleteConnection(item)}
+                        activeOpacity={0.7}
+                    >
+                        <Feather name="trash-2" size={18} color={colors.error[500]} />
+                        <Text style={[styled.actionButtonText, styled.deleteButtonText]}>
+                            Remover
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            <View style={styled.accountsInfo}>
-                <Feather name="layers" size={14} color={theme.foregroundMuted} />
-                <Text style={styled.accountsText}>
-                    {item._count?.bankAccounts || item.bankAccounts?.length || 0} conta(s) vinculada(s)
-                </Text>
-            </View>
-
-            <View style={styled.connectionActions}>
-                <TouchableOpacity
-                    style={styled.actionButton}
-                    onPress={() => handleSyncConnection(item.id)}
-                    activeOpacity={0.7}
-                >
-                    <Feather name="refresh-cw" size={18} color={colors.primary[600]} />
-                    <Text style={styled.actionButtonText}>Sincronizar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styled.actionButton, styled.deleteButton]}
-                    onPress={() => handleDeleteConnection(item)}
-                    activeOpacity={0.7}
-                >
-                    <Feather name="trash-2" size={18} color={colors.error[500]} />
-                    <Text style={[styled.actionButtonText, styled.deleteButtonText]}>
-                        Remover
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+        );
+    };
 
     const renderEmptyState = () => (
         <View style={styled.emptyContainer}>
@@ -224,13 +303,26 @@ export default function MyConnectionsScreen() {
                 <Feather name="arrow-left" size={24} color={theme.foreground} />
             </TouchableOpacity>
             <Text style={styled.headerTitle}>Minhas conexões</Text>
-            <TouchableOpacity
-                onPress={handleAddConnection}
-                style={styled.addButton}
-                activeOpacity={0.7}
-            >
-                <Feather name="plus" size={24} color={colors.primary[600]} />
-            </TouchableOpacity>
+            <View style={styled.headerActions}>
+                <TouchableOpacity
+                    onPress={handleToggleHideValues}
+                    style={styled.headerActionButton}
+                    activeOpacity={0.7}
+                >
+                    <Feather
+                        name={hideValues ? 'eye-off' : 'eye'}
+                        size={20}
+                        color={theme.foreground}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={handleAddConnection}
+                    style={styled.addButton}
+                    activeOpacity={0.7}
+                >
+                    <Feather name="plus" size={24} color={colors.primary[600]} />
+                </TouchableOpacity>
+            </View>
         </View>
     );
 
@@ -267,6 +359,14 @@ export default function MyConnectionsScreen() {
                     />
                 }
                 showsVerticalScrollIndicator={false}
+            />
+
+            <DeleteConnectionBottomSheet
+                modalizeRef={deleteModalRef}
+                connectionName={selectedConnection?.connectorName || ''}
+                onConfirm={handleConfirmDelete}
+                onCancel={handleCancelDelete}
+                isLoading={isDeletingConnection}
             />
         </View>
     );

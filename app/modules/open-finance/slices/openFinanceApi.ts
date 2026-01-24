@@ -2,6 +2,15 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient, ApiError } from '@app/utils/api';
 import { RootState } from '@app/store';
 
+// Helper para garantir que o token está sincronizado
+const ensureToken = (getState: () => unknown): void => {
+    const state = getState() as { auth: { token: string | null } };
+    const token = state.auth?.token;
+    if (token && !apiClient.getToken()) {
+        apiClient.setToken(token);
+    }
+};
+
 export interface ConnectorCredential {
     name: string;
     label: string;
@@ -108,18 +117,25 @@ export interface BankAccount {
     id: string;
     name: string;
     type: string;
-    balance: string;
+    subtype?: string;
+    balance: number;
+    number?: string;
     accountId: string | null;
+    bankConnection?: {
+        connectorName: string;
+        status: string;
+    };
 }
 
 export interface BankConnection {
     id: string;
-    pluggyItemId: string;
+    pluggyItemId?: string;
     connectorName: string;
     connectorLogo: string;
     status: string;
     lastSyncAt: string | null;
-    bankAccounts: BankAccount[];
+    createdAt: string;
+    bankAccounts?: BankAccount[];
     _count?: {
         bankAccounts: number;
     };
@@ -138,16 +154,9 @@ export const createConnection = createAsyncThunk<
     { state: RootState; rejectValue: string }
 >('openFinance/createConnection', async (data, { getState, rejectWithValue }) => {
     try {
-        const { auth } = getState();
-        const token = (auth as { token: string | null }).token;
+        ensureToken(getState);
 
-        if (!token) {
-            return rejectWithValue('Token não encontrado');
-        }
-
-        const response = await apiClient.post<BankConnection>('/api/bank/connections', data, {
-            Authorization: `Bearer ${token}`,
-        });
+        const response = await apiClient.post<BankConnection>('/api/bank/connections', data);
 
         return response;
     } catch (error) {
@@ -163,21 +172,19 @@ export const fetchConnections = createAsyncThunk<
     { state: RootState; rejectValue: string }
 >('openFinance/fetchConnections', async (_, { getState, rejectWithValue }) => {
     try {
-        const { auth } = getState();
-        const token = (auth as { token: string | null }).token;
+        ensureToken(getState);
+        const response = await apiClient.get<{ connections: BankConnection[] }>('/api/bank/connections');
 
-        if (!token) {
-            return rejectWithValue('Token não encontrado');
-        }
-
-        const response = await apiClient.get<BankConnection[]>('/api/bank/connections', {
-            Authorization: `Bearer ${token}`,
-        });
-
-        return response;
+        return response.connections;
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao buscar conexões';
+        
+        if (__DEV__) {
+            console.error('❌ [fetchConnections] Erro:', errorMessage);
+            console.error('❌ [fetchConnections] Detalhes:', error);
+        }
+        
         return rejectWithValue(errorMessage);
     }
 });
@@ -193,19 +200,11 @@ export const syncConnection = createAsyncThunk<
     { state: RootState; rejectValue: string }
 >('openFinance/syncConnection', async (connectionId, { getState, rejectWithValue }) => {
     try {
-        const { auth } = getState();
-        const token = (auth as { token: string | null }).token;
-
-        if (!token) {
-            return rejectWithValue('Token não encontrado');
-        }
+        ensureToken(getState);
 
         const response = await apiClient.post<SyncConnectionResponse>(
             `/api/bank/connections/${connectionId}/sync`,
             {},
-            {
-                Authorization: `Bearer ${token}`,
-            },
         );
 
         return response;
@@ -217,26 +216,18 @@ export const syncConnection = createAsyncThunk<
 });
 
 export const deleteConnection = createAsyncThunk<
-    { success: boolean },
+    { success: boolean; connectionId: string },
     string,
     { state: RootState; rejectValue: string }
 >('openFinance/deleteConnection', async (connectionId, { getState, rejectWithValue }) => {
     try {
-        const { auth } = getState();
-        const token = (auth as { token: string | null }).token;
-
-        if (!token) {
-            return rejectWithValue('Token não encontrado');
-        }
+        ensureToken(getState);
 
         const response = await apiClient.delete<{ success: boolean }>(
             `/api/bank/connections/${connectionId}`,
-            {
-                Authorization: `Bearer ${token}`,
-            },
         );
 
-        return response;
+        return { ...response, connectionId };
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao deletar conexão';

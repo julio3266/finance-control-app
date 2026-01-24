@@ -8,6 +8,8 @@ interface BalanceCardProps {
     income: string;
     expenses: string;
     onMorePress?: () => void;
+    hideValues?: boolean;
+    onToggleHideValues?: () => void;
 }
 
 export const BalanceCard: React.FC<BalanceCardProps> = ({
@@ -15,6 +17,8 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
     income,
     expenses,
     onMorePress,
+    hideValues = false,
+    onToggleHideValues,
 }) => {
     const styled = styles();
 
@@ -32,11 +36,30 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
                     <View style={styled.balanceHeader}>
                         <Text style={styled.balanceLabel}>Saldo Total</Text>
                     </View>
-                    {onMorePress && (
-                        <TouchableOpacity onPress={onMorePress} activeOpacity={0.7}>
-                            <Feather name="more-horizontal" size={24} color="#ffffff" />
-                        </TouchableOpacity>
-                    )}
+                    <View style={styled.headerActions}>
+                        {onToggleHideValues && (
+                            <TouchableOpacity
+                                onPress={onToggleHideValues}
+                                activeOpacity={0.7}
+                                style={styled.actionButton}
+                            >
+                                <Feather
+                                    name={hideValues ? 'eye-off' : 'eye'}
+                                    size={20}
+                                    color="#ffffff"
+                                />
+                            </TouchableOpacity>
+                        )}
+                        {onMorePress && (
+                            <TouchableOpacity
+                                onPress={onMorePress}
+                                activeOpacity={0.7}
+                                style={styled.actionButton}
+                            >
+                                <Feather name="more-horizontal" size={24} color="#ffffff" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
 
                 <Text style={styled.balanceValue}>{totalBalance}</Text>
@@ -98,6 +121,14 @@ const styles = () =>
             flexDirection: 'row',
             alignItems: 'center',
             gap: 8,
+        },
+        headerActions: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        actionButton: {
+            padding: 4,
         },
         balanceLabel: {
             fontSize: 14,

@@ -4,10 +4,12 @@ export type ThemeMode = 'light' | 'dark';
 
 interface ThemeState {
     mode: ThemeMode;
+    hideValues: boolean;
 }
 
 const initialState: ThemeState = {
     mode: 'light',
+    hideValues: false,
 };
 
 const themeSlice = createSlice({
@@ -20,8 +22,14 @@ const themeSlice = createSlice({
         toggleTheme: (state) => {
             state.mode = state.mode === 'light' ? 'dark' : 'light';
         },
+        toggleHideValues: (state) => {
+            state.hideValues = !state.hideValues;
+        },
+        setHideValues: (state, action: PayloadAction<boolean>) => {
+            state.hideValues = action.payload;
+        },
     },
 });
 
-export const { setTheme, toggleTheme } = themeSlice.actions;
+export const { setTheme, toggleTheme, toggleHideValues, setHideValues } = themeSlice.actions;
 export default themeSlice.reducer;
