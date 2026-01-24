@@ -24,6 +24,7 @@ import extractReducerDefault from '../modules/extract/slices/extractSlice';
 import { goalsReducer } from '../modules/goals/slices';
 import { subscriptionReducer } from '../modules/subscription/slices';
 import { reportsReducer } from '../modules/reports/slices';
+import investimentsReducer from '../modules/investiments/slices/investimentsSlice';
 import { errorMiddleware } from './middleware';
 
 type AuthStateType = ReturnType<typeof authReducer>;
@@ -38,6 +39,7 @@ type ExtractStateType = ReturnType<typeof extractReducerDefault>;
 type GoalsStateType = ReturnType<typeof goalsReducer>;
 type SubscriptionStateType = ReturnType<typeof subscriptionReducer>;
 type ReportsStateType = ReturnType<typeof reportsReducer>;
+type InvestimentsStateType = ReturnType<typeof investimentsReducer>;
 
 const authPersistConfig = {
     key: 'auth',
@@ -81,6 +83,7 @@ export const store = configureStore({
         goals: goalsReducer,
         subscription: subscriptionReducer,
         reports: reportsReducer,
+        investments: investimentsReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -107,6 +110,7 @@ export interface TypedRootState {
     goals: GoalsStateType;
     subscription: SubscriptionStateType;
     reports: ReportsStateType;
+    investments: InvestimentsStateType;
 }
 
 export type RootStateTyped = RootState & TypedRootState;

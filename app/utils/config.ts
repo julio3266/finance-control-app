@@ -25,4 +25,8 @@ export const config = {
     apiUrl: apiUrlFromEnv || defaultApiUrl,
     apiTimeout: parseInt(getEnvVar('API_TIMEOUT', '30000'), 10),
     env: isQA ? 'qa' : 'prod',
+    stripePublishableKey: getEnvVar(
+        'STRIPE_PUBLISHABLE_KEY',
+        'pk_test_51RNYmjEeMNFDUf5f98qKjQinUkmWb56Ap2oJkh1LaXC7vXFoCoyCMkGZ5XsRh1txciKCtFtVZAMAHsnzTvjSFeQ000YqMztJZG'
+    ),
 };

@@ -88,12 +88,13 @@ export default function ProfileScreen() {
     const profile = useAppSelector((state) => state.profile.profile);
     const profileLoading = useAppSelector((state) => state.profile.loading);
 
-    // Buscar perfil quando o componente montar
+    // Buscar perfil quando o componente montar (se ainda não tiver)
+    // Dependências vazias para evitar re-fetch desnecessário
     useEffect(() => {
         if (!profile && !profileLoading) {
             dispatch(fetchUserProfile());
         }
-    }, [dispatch, profile, profileLoading]);
+    }, []); // Removido dispatch, profile, profileLoading das dependências
 
     const handleLogout = () => {
         apiClient.setToken(null);

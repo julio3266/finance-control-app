@@ -47,7 +47,7 @@ export const loginUser = createAsyncThunk(
                 otp,
             });
 
-            // Set token in API client for authenticated requests
+            
             apiClient.setToken(response.token);
 
             dispatch(setOtp(otp));

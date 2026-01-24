@@ -8,7 +8,6 @@ import {
     TouchableWithoutFeedback,
 } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
-import { colors } from '@app/utils/colors';
 import { styles } from './styles';
 
 interface MoreSubMenuProps {

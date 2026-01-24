@@ -4,6 +4,8 @@ import {
     fetchPlanDetails,
     fetchSubscriptionInfo,
     createCheckoutSession,
+    createSetupIntent,
+    createPaymentIntent,
     openStripePortal,
     cancelSubscription,
     reactivateSubscription,
@@ -16,6 +18,7 @@ interface SubscriptionState {
     selectedPlan: Plan | null;
     subscriptionInfo: SubscriptionInfo | null;
     checkoutUrl: string | null;
+    clientSecret: string | null;
     portalUrl: string | null;
     loading: boolean;
     plansLoading: boolean;
@@ -31,6 +34,7 @@ const initialState: SubscriptionState = {
     selectedPlan: null,
     subscriptionInfo: null,
     checkoutUrl: null,
+    clientSecret: null,
     portalUrl: null,
     loading: false,
     plansLoading: false,
@@ -50,6 +54,9 @@ const subscriptionSlice = createSlice({
         },
         clearCheckoutUrl: (state) => {
             state.checkoutUrl = null;
+        },
+        clearClientSecret: (state) => {
+            state.clientSecret = null;
         },
         clearPortalUrl: (state) => {
             state.portalUrl = null;
@@ -113,6 +120,34 @@ const subscriptionSlice = createSlice({
                 state.error = action.payload || 'Erro ao criar checkout';
             })
 
+            // Create setup intent (for subscriptions)
+            .addCase(createSetupIntent.pending, (state) => {
+                state.checkoutLoading = true;
+                state.error = null;
+            })
+            .addCase(createSetupIntent.fulfilled, (state, action) => {
+                state.checkoutLoading = false;
+                state.clientSecret = action.payload.clientSecret;
+            })
+            .addCase(createSetupIntent.rejected, (state, action) => {
+                state.checkoutLoading = false;
+                state.error = action.payload || 'Erro ao criar setup intent';
+            })
+
+            // Create payment intent (native SDK)
+            .addCase(createPaymentIntent.pending, (state) => {
+                state.checkoutLoading = true;
+                state.error = null;
+            })
+            .addCase(createPaymentIntent.fulfilled, (state, action) => {
+                state.checkoutLoading = false;
+                state.clientSecret = action.payload.clientSecret;
+            })
+            .addCase(createPaymentIntent.rejected, (state, action) => {
+                state.checkoutLoading = false;
+                state.error = action.payload || 'Erro ao criar pagamento';
+            })
+
             // Open portal
             .addCase(openStripePortal.pending, (state) => {
                 state.portalLoading = true;
@@ -161,5 +196,5 @@ const subscriptionSlice = createSlice({
     },
 });
 
-export const { clearError, clearCheckoutUrl, clearPortalUrl } = subscriptionSlice.actions;
+export const { clearError, clearCheckoutUrl, clearClientSecret, clearPortalUrl } = subscriptionSlice.actions;
 export default subscriptionSlice.reducer;

@@ -1,9 +1,11 @@
-export { default as subscriptionReducer, clearError, clearCheckoutUrl, clearPortalUrl } from './subscriptionSlice';
+export { default as subscriptionReducer, clearError, clearCheckoutUrl, clearClientSecret, clearPortalUrl } from './subscriptionSlice';
 export {
     fetchPlans,
     fetchPlanDetails,
     fetchSubscriptionInfo,
     createCheckoutSession,
+    createSetupIntent,
+    createPaymentIntent,
     openStripePortal,
     cancelSubscription,
     reactivateSubscription,
@@ -14,6 +16,8 @@ export {
     type PlansResponse,
     type SubscriptionInfo,
     type CheckoutResponse,
+    type SetupIntentResponse,
+    type PaymentIntentResponse,
     type PortalResponse,
     type FeatureAccessResponse,
 } from './subscriptionApi';

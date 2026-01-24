@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     StatusBar,
     TextInput as RNTextInput,
+    ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +15,14 @@ import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { useFormValidation } from '@app/utils/useFormValidation';
+import { useAppDispatch, useAppSelector } from '@app/store';
+import {
+    createFixedIncome,
+    createVariableIncome,
+    CreateFixedIncomePayload
+} from '@app/modules/investiments/slices/investimentsApi';
+import { AssetSearchPicker, type AssetSearchResult } from '@app/modules/investiments/components/AssetSearchPicker';
+import { BrokerSearchPicker, type InstitutionSearchResult } from '@app/modules/investiments/components/BrokerSearchPicker';
 import {
     AccountPickerModal,
     Account,
@@ -28,12 +37,20 @@ import { styles } from './styles';
 export const NewInvestmentScreen: React.FC = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const dispatch = useAppDispatch();
     const insets = useSafeAreaInsets();
     const styled = styles(theme);
+
+    const { createLoading } = useAppSelector(
+        (state) => state.investments,
+    );
 
     const [investmentType, setInvestmentType] = useState<'fixed' | 'variable'>('fixed');
     const [selectedFixedInvestmentType, setSelectedFixedInvestmentType] =
         useState<InvestmentType | null>(null);
+    const [variableIncomeType, setVariableIncomeType] = useState<
+        'STOCK' | 'FII' | 'ETF' | 'BDR' | 'CRYPTO'
+    >('STOCK');
     const [investmentName, setInvestmentName] = useState('');
     const [broker, setBroker] = useState('');
     const [investedValue, setInvestedValue] = useState('');
@@ -53,12 +70,41 @@ export const NewInvestmentScreen: React.FC = () => {
     const purchaseDateModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
     const maturityDateModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
     const investmentTypeModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
+    const assetSearchModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
+    const brokerSearchModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
     const scrollViewRef = useRef<ScrollView>(null);
 
     const { validate, getFieldError, validateField } =
         useFormValidation<InvestmentFormValues>(investmentSchema);
 
     const accentColor = colors?.primary?.[600];
+
+    const handleAssetSelect = useCallback((asset: AssetSearchResult) => {
+        setTicker(asset.ticker);
+        setAssetName(asset.name);
+        setAssetSearch(asset.ticker);
+
+        if (asset.price) {
+            const formattedPrice = `R$ ${asset.price.toFixed(2).replace('.', ',')}`;
+            setCurrentPrice(formattedPrice);
+            setAveragePrice(formattedPrice);
+        }
+
+        if (asset.type) {
+            const typeMap: Record<string, 'STOCK' | 'FII' | 'ETF' | 'BDR' | 'CRYPTO'> = {
+                'ACAO': 'STOCK',
+                'FII': 'FII',
+                'ETF': 'ETF',
+                'BDR': 'BDR',
+                'CRYPTO': 'CRYPTO',
+            };
+            setVariableIncomeType(typeMap[asset.type] || 'STOCK');
+        }
+    }, []);
+
+    const handleBrokerSelect = useCallback((institution: InstitutionSearchResult) => {
+        setBroker(institution.name);
+    }, []);
 
     const handleBack = () => {
         navigation.goBack();
@@ -70,7 +116,7 @@ export const NewInvestmentScreen: React.FC = () => {
         }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const formData: InvestmentFormValues = {
             investmentType,
             fixedInvestmentType:
@@ -78,11 +124,11 @@ export const NewInvestmentScreen: React.FC = () => {
             investmentName,
             broker,
             investedValue: investmentType === 'fixed' ? investedValue : '',
-            purchaseDate: purchaseDate ? formatDate(purchaseDate) : undefined,
+            purchaseDate: purchaseDate ? formatDateToISO(purchaseDate) : undefined,
             maturityDate:
                 investmentType === 'fixed'
                     ? maturityDate
-                        ? formatDate(maturityDate)
+                        ? formatDateToISO(maturityDate)
                         : undefined
                     : undefined,
             indexer: investmentType === 'fixed' ? indexer || undefined : undefined,
@@ -96,7 +142,48 @@ export const NewInvestmentScreen: React.FC = () => {
             accountId: selectedAccount?.id || null,
         };
 
+
         if (validate(formData)) {
+            if (investmentType === 'fixed') {
+                const payload = {
+                    name: investmentName,
+                    broker: broker,
+                    investedAmount: parseAmount(investedValue),
+                    purchaseDate: formatDateToISO(purchaseDate || new Date()),
+                    fixedIncomeType: (selectedFixedInvestmentType?.code ||
+                        'CDB') as CreateFixedIncomePayload['fixedIncomeType'],
+                    ...(maturityDate && { maturityDate: formatDateToISO(maturityDate) }),
+                    ...(indexer && { indexer: indexer as CreateFixedIncomePayload['indexer'] }),
+                    ...(rate && { rate: parseFloat(rate) }),
+                };
+
+                await dispatch(createFixedIncome(payload)).unwrap();
+                navigation.goBack();
+            } else {
+                const apiTypeMap: Record<string, string> = {
+                    'STOCK': 'ACAO',
+                    'FII': 'FII',
+                    'ETF': 'ETF',
+                    'BDR': 'BDR',
+                    'CRYPTO': 'CRYPTO',
+                };
+
+                const payload = {
+                    name: assetName || ticker,
+                    ticker: ticker,
+                    broker: broker,
+                    variableIncomeType: apiTypeMap[variableIncomeType] || variableIncomeType,
+                    quantity: parseInt(quantity, 10),
+                    averagePrice: parseAmount(averagePrice),
+                    ...(currentPrice &&
+                        currentPrice !== 'R$ 0,00' && {
+                        currentPrice: parseAmount(currentPrice),
+                    }),
+                };
+
+                await dispatch(createVariableIncome(payload)).unwrap();
+                navigation.goBack();
+            }
         } else {
             scrollViewRef.current?.scrollTo({ y: 0, animated: true });
         }
@@ -108,12 +195,25 @@ export const NewInvestmentScreen: React.FC = () => {
         setter(normalized);
     };
 
+    const parseAmount = (value: string): number => {
+        const cleaned = value.replace(/[^\d,.]/g, '');
+        const normalized = cleaned.replace(/\./g, '').replace(',', '.');
+        return parseFloat(normalized) || 0;
+    };
+
     const formatDate = (date: Date | null): string => {
         if (!date) return '';
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
+    };
+
+    const formatDateToISO = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     return (
@@ -211,9 +311,9 @@ export const NewInvestmentScreen: React.FC = () => {
                                     style={[
                                         styled.input,
                                         investmentName &&
-                                            !getFieldError('investmentName') && {
-                                                borderBottomColor: accentColor,
-                                            },
+                                        !getFieldError('investmentName') && {
+                                            borderBottomColor: accentColor,
+                                        },
                                         getFieldError('investmentName') && styled.inputError,
                                     ]}
                                     value={investmentName}
@@ -235,32 +335,32 @@ export const NewInvestmentScreen: React.FC = () => {
                                 <Text style={styled.inputLabel}>
                                     Corretora/Banco <Text style={styled.required}>*</Text>
                                 </Text>
-                                <View
+                                <TouchableOpacity
                                     style={[
                                         styled.inputWithIcon,
-                                        broker &&
-                                            !getFieldError('broker') && {
-                                                borderBottomColor: accentColor,
-                                            },
+                                        broker && {
+                                            borderBottomColor: accentColor,
+                                        },
                                         getFieldError('broker') && styled.inputError,
                                     ]}
+                                    onPress={() => brokerSearchModalRef.current?.open()}
                                 >
-                                    <RNTextInput
-                                        style={styled.inputWithIconText}
-                                        value={broker}
-                                        onChangeText={(text) => {
-                                            setBroker(text);
-                                            validateField('broker', text);
-                                        }}
-                                        placeholder="Ex: Inter, XP, Nubank..."
-                                        placeholderTextColor={theme.foregroundMuted}
-                                    />
+                                    <Text
+                                        style={[
+                                            styled.inputWithIconText,
+                                            broker
+                                                ? { color: theme.foreground }
+                                                : { color: theme.foregroundMuted },
+                                        ]}
+                                    >
+                                        {broker || 'Selecione uma corretora ou banco...'}
+                                    </Text>
                                     <Feather
                                         name="search"
                                         size={20}
                                         color={theme.foregroundMuted}
                                     />
-                                </View>
+                                </TouchableOpacity>
                                 {getFieldError('broker') && (
                                     <Text style={styled.errorText}>{getFieldError('broker')}</Text>
                                 )}
@@ -274,9 +374,9 @@ export const NewInvestmentScreen: React.FC = () => {
                                     style={[
                                         styled.input,
                                         investedValue &&
-                                            !getFieldError('investedValue') && {
-                                                borderBottomColor: accentColor,
-                                            },
+                                        !getFieldError('investedValue') && {
+                                            borderBottomColor: accentColor,
+                                        },
                                         getFieldError('investedValue') && styled.inputError,
                                     ]}
                                     value={investedValue}
@@ -360,38 +460,38 @@ export const NewInvestmentScreen: React.FC = () => {
                         <>
                             {/* Buscar Ativo */}
                             <View style={styled.inputSection}>
-                                <Text style={styled.inputLabel}>Buscar Ativo</Text>
-                                <RNTextInput
-                                    style={styled.input}
-                                    value={assetSearch}
-                                    onChangeText={setAssetSearch}
-                                    placeholder="Digite o ticker ou nome do ativo..."
-                                    placeholderTextColor={theme.foregroundMuted}
-                                />
-                            </View>
-
-                            {/* Ticker */}
-                            <View style={styled.inputSection}>
-                                <Text style={styled.inputLabel}>Ticker</Text>
-                                <RNTextInput
-                                    style={styled.input}
-                                    value={ticker}
-                                    onChangeText={setTicker}
-                                    placeholder="Ex: PETR4"
-                                    placeholderTextColor={theme.foregroundMuted}
-                                />
-                            </View>
-
-                            {/* Nome do Ativo */}
-                            <View style={styled.inputSection}>
-                                <Text style={styled.inputLabel}>Nome do Ativo</Text>
-                                <RNTextInput
-                                    style={styled.input}
-                                    value={assetName}
-                                    onChangeText={setAssetName}
-                                    placeholder="Ex: Petrobras PN"
-                                    placeholderTextColor={theme.foregroundMuted}
-                                />
+                                <Text style={styled.inputLabel}>
+                                    Buscar Ativo <Text style={styled.required}>*</Text>
+                                </Text>
+                                <TouchableOpacity
+                                    style={[
+                                        styled.inputWithIcon,
+                                        ticker && {
+                                            borderBottomColor: accentColor,
+                                        },
+                                        getFieldError('ticker') && styled.inputError,
+                                    ]}
+                                    onPress={() => assetSearchModalRef.current?.open()}
+                                >
+                                    <Text
+                                        style={[
+                                            styled.inputWithIconText,
+                                            ticker
+                                                ? { color: theme.foreground }
+                                                : { color: theme.foregroundMuted },
+                                        ]}
+                                    >
+                                        {ticker ? `${ticker} - ${assetName}` : 'Selecione um ativo...'}
+                                    </Text>
+                                    <Feather
+                                        name="search"
+                                        size={20}
+                                        color={theme.foregroundMuted}
+                                    />
+                                </TouchableOpacity>
+                                {getFieldError('ticker') && (
+                                    <Text style={styled.errorText}>{getFieldError('ticker')}</Text>
+                                )}
                             </View>
 
                             {/* Corretora */}
@@ -399,32 +499,32 @@ export const NewInvestmentScreen: React.FC = () => {
                                 <Text style={styled.inputLabel}>
                                     Corretora <Text style={styled.required}>*</Text>
                                 </Text>
-                                <View
+                                <TouchableOpacity
                                     style={[
                                         styled.inputWithIcon,
-                                        broker &&
-                                            !getFieldError('broker') && {
-                                                borderBottomColor: accentColor,
-                                            },
+                                        broker && {
+                                            borderBottomColor: accentColor,
+                                        },
                                         getFieldError('broker') && styled.inputError,
                                     ]}
+                                    onPress={() => brokerSearchModalRef.current?.open()}
                                 >
-                                    <RNTextInput
-                                        style={styled.inputWithIconText}
-                                        value={broker}
-                                        onChangeText={(text) => {
-                                            setBroker(text);
-                                            validateField('broker', text);
-                                        }}
-                                        placeholder="Ex: XP, Clear, Rico..."
-                                        placeholderTextColor={theme.foregroundMuted}
-                                    />
+                                    <Text
+                                        style={[
+                                            styled.inputWithIconText,
+                                            broker
+                                                ? { color: theme.foreground }
+                                                : { color: theme.foregroundMuted },
+                                        ]}
+                                    >
+                                        {broker || 'Selecione uma corretora...'}
+                                    </Text>
                                     <Feather
                                         name="search"
                                         size={20}
                                         color={theme.foregroundMuted}
                                     />
-                                </View>
+                                </TouchableOpacity>
                                 {getFieldError('broker') && (
                                     <Text style={styled.errorText}>{getFieldError('broker')}</Text>
                                 )}
@@ -432,15 +532,32 @@ export const NewInvestmentScreen: React.FC = () => {
 
                             {/* Quantidade */}
                             <View style={styled.inputSection}>
-                                <Text style={styled.inputLabel}>Quantidade</Text>
+                                <Text style={styled.inputLabel}>
+                                    Quantidade <Text style={styled.required}>*</Text>
+                                </Text>
                                 <RNTextInput
-                                    style={styled.input}
+                                    style={[
+                                        styled.input,
+                                        quantity &&
+                                        !getFieldError('quantity') && {
+                                            borderBottomColor: accentColor,
+                                        },
+                                        getFieldError('quantity') && styled.inputError,
+                                    ]}
                                     value={quantity}
-                                    onChangeText={setQuantity}
+                                    onChangeText={(text) => {
+                                        setQuantity(text);
+                                        validateField('quantity', text);
+                                    }}
                                     placeholder="100"
                                     placeholderTextColor={theme.foregroundMuted}
                                     keyboardType="numeric"
                                 />
+                                {getFieldError('quantity') && (
+                                    <Text style={styled.errorText}>
+                                        {getFieldError('quantity')}
+                                    </Text>
+                                )}
                             </View>
 
                             {/* Preço Médio */}
@@ -473,15 +590,24 @@ export const NewInvestmentScreen: React.FC = () => {
                             <View style={styled.inputSection}>
                                 <Text style={styled.inputLabel}>Preço Atual (opcional)</Text>
                                 <RNTextInput
-                                    style={styled.input}
+                                    style={[
+                                        styled.input,
+                                        getFieldError('currentPrice') && styled.inputError,
+                                    ]}
                                     value={currentPrice}
                                     onChangeText={(text) => {
                                         handleAmountChange(text, setCurrentPrice);
+                                        validateField('currentPrice', text);
                                     }}
                                     placeholder="R$ 0,00"
                                     placeholderTextColor={theme.foregroundMuted}
                                     keyboardType="numeric"
                                 />
+                                {getFieldError('currentPrice') && (
+                                    <Text style={styled.errorText}>
+                                        {getFieldError('currentPrice')}
+                                    </Text>
+                                )}
                             </View>
 
                             {/* Conta (opcional) */}
@@ -517,25 +643,43 @@ export const NewInvestmentScreen: React.FC = () => {
             >
                 <TouchableOpacity
                     onPress={handleSave}
-                    style={[styled.saveButton, { backgroundColor: accentColor }]}
+                    style={[
+                        styled.saveButton,
+                        { backgroundColor: accentColor },
+                        createLoading && { opacity: 0.7 },
+                    ]}
                     activeOpacity={0.8}
+                    disabled={createLoading}
                 >
-                    <Feather name="check" size={28} color="#ffffff" />
+                    {createLoading ? (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                        <Feather name="check" size={28} color="#ffffff" />
+                    )}
                 </TouchableOpacity>
             </View>
-
-            {/* Account Picker Modal */}
             <AccountPickerModal
                 selectedAccount={selectedAccount}
                 onSelect={handleAccountSelect}
                 modalizeRef={accountModalRef}
             />
 
-            {/* Investment Type Picker Modal */}
             <InvestmentTypePickerModal
                 modalizeRef={investmentTypeModalRef}
                 selectedType={selectedFixedInvestmentType}
                 onSelect={setSelectedFixedInvestmentType}
+            />
+
+            {/* Asset Search Picker */}
+            <AssetSearchPicker
+                modalizeRef={assetSearchModalRef}
+                onSelect={handleAssetSelect}
+            />
+
+            {/* Broker Search Picker */}
+            <BrokerSearchPicker
+                modalizeRef={brokerSearchModalRef}
+                onSelect={handleBrokerSelect}
             />
 
             {/* Date Pickers */}

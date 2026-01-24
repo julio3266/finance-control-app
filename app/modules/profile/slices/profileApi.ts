@@ -41,7 +41,6 @@ export const fetchUserProfile = createAsyncThunk<
         const response = await apiClient.get<UserProfileResponse>('/api/auth/profile', {
             Authorization: `Bearer ${token}`,
         });
-
         return response;
     } catch (error) {
         const apiError = error as ApiError;

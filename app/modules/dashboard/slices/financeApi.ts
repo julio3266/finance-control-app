@@ -15,6 +15,7 @@ export interface FinanceOverviewResponse {
     totalBalance: number;
     totalIncome: number;
     totalExpenses: number;
+    isPremium: boolean;
     creditCards?: {
         cards: CreditCardResponse[];
         total: number;

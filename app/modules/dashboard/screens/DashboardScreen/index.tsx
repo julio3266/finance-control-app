@@ -4,12 +4,11 @@ import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { useAppSelector, useAppDispatch } from '@app/store';
 import { toggleHideValues } from '@app/store/themeSlice';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
 import { ScreenWithHeader } from '@app/modules/Home/components';
 import { formatCurrencyWithHide } from '@app/utils/formatCurrency';
-import { fetchFinanceOverview } from '../../slices/financeApi';
 import {
     CreditCardResponse,
     fetchCreditCards,
@@ -22,6 +21,7 @@ import { GoalsList } from '@app/modules/goals';
 import { fetchGoals } from '@app/modules/goals/slices';
 import { fetchUnifiedAccounts, type UnifiedAccountResponse } from '@app/modules/accounts';
 import { fetchUserProfile } from '@app/modules/profile/slices/profileApi';
+import { fetchFinanceOverview } from '@app/modules/dashboard/slices/financeApi';
 import Feather from '@expo/vector-icons/Feather';
 import { styles } from './styles';
 
@@ -30,14 +30,10 @@ export default function DashboardScreen() {
     const parentNavigation = useNavigation<NavigationProp<MainStackParamList>>();
     const dispatch = useAppDispatch();
     const styled = styles(theme);
-    const profile = useAppSelector((state) => state.profile.profile);
-    const profileLoading = useAppSelector((state) => state.profile.loading);
-    const isPremium = profile?.isPremium;
-    const balance = useAppSelector((state) => state.finance.balance);
-    const income = useAppSelector((state) => state.finance.income);
-    const expenses = useAppSelector((state) => state.finance.expenses);
+    const { balance, income, expenses } = useAppSelector((state) => state.finance);
+    const financeOverview = useAppSelector((state) => state.finance.financeOverviewResponse);
     const creditCardsFromOverviewRaw = useAppSelector(
-        (state) => (state.finance as any).creditCards?.cards,
+        (state) => state.finance.creditCards?.cards,
     );
     const creditCardsFromOverview = useMemo(
         () => creditCardsFromOverviewRaw || [],
@@ -50,9 +46,10 @@ export default function DashboardScreen() {
     const goals = useAppSelector((state) => (state as any).goals.goals || []);
     const unifiedAccountsRaw = useAppSelector((state) => (state as any).accounts?.unifiedAccounts || []);
     const hideValues = useAppSelector((state) => state.theme.hideValues);
+    const profile = useAppSelector((state) => state.profile.profile);
     const [refreshing, setRefreshing] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
-
+    const [profileFetchAttempted, setProfileFetchAttempted] = useState(false);
     const handleToggleHideValues = () => {
         dispatch(toggleHideValues());
     };
@@ -61,13 +58,13 @@ export default function DashboardScreen() {
         const loadInitialData = async () => {
             setInitialLoading(true);
             try {
-                await dispatch(fetchFinanceOverview() as any).unwrap();
                 await Promise.all([
+                    dispatch(fetchUserProfile() as any).unwrap(),
+                    dispatch(fetchFinanceOverview() as any).unwrap(),
                     dispatch(fetchCreditCards() as any).unwrap(),
                     dispatch(fetchCardBrands() as any).unwrap(),
                     dispatch(fetchGoals() as any).unwrap(),
                     dispatch(fetchUnifiedAccounts() as any).unwrap(),
-                    ...(!profile && !profileLoading ? [dispatch(fetchUserProfile() as any).unwrap()] : []),
                 ]);
             } catch (err) {
             } finally {
@@ -76,20 +73,33 @@ export default function DashboardScreen() {
         };
 
         loadInitialData();
-    }, [dispatch, profile, profileLoading]);
+    }, []);
+
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (!profileFetchAttempted) {
+                setProfileFetchAttempted(true);
+                setTimeout(() => {
+                    setProfileFetchAttempted(false);
+                }, 3000);
+            }
+        }, [dispatch, , profileFetchAttempted])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
         try {
-            await dispatch(fetchFinanceOverview() as any).unwrap();
             await Promise.all([
+                dispatch(fetchFinanceOverview() as any).unwrap(),
                 dispatch(fetchCreditCards() as any).unwrap(),
                 dispatch(fetchCardBrands() as any).unwrap(),
                 dispatch(fetchGoals() as any).unwrap(),
                 dispatch(fetchUnifiedAccounts() as any).unwrap(),
-                dispatch(fetchUserProfile() as any).unwrap(),
+                dispatch(fetchUserProfile() as any).unwrap()
             ]);
         } catch (err) {
+
         } finally {
             setRefreshing(false);
         }
@@ -237,11 +247,8 @@ export default function DashboardScreen() {
     const handleOpenFinancePress = () => {
         (parentNavigation as any).navigate('OpenFinance', { screen: 'ConnectAccounts' });
     };
-
     const renderPremiumCard = () => {
-        if (profileLoading) return null;
-
-        if (isPremium) {
+        if (profile?.isPremium) {
             return (
                 <TouchableOpacity
                     style={styled.premiumCard}

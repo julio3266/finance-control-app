@@ -1,33 +1,46 @@
 {
-    "expo": {
-        "name": "finance-control-app",
-        "slug": "finance-control-app",
-        "version": "1.0.0",
-        "scheme": "financecontrol",
-        "extra": {
-            "API_URL": "https://www.api-qa.financecontrolapp.com.br",
-            "API_TIMEOUT": "30000",
-            "ENV": "qa"
-        },
-        "plugins": ["expo-router"],
-        "android": {
-            "package": "com.anonymous.financecontrolapp",
-            "intentFilters": [
-                {
-                    "action": "VIEW",
-                    "autoVerify": true,
-                    "data": [
-                        {
-                            "scheme": "financecontrol"
-                        }
-                    ],
-                    "category": ["BROWSABLE", "DEFAULT"]
-                }
-            ]
-        },
-        "ios": {
-            "bundleIdentifier": "com.anonymous.financecontrolapp",
-            "associatedDomains": ["applinks:financecontrolapp.com.br"]
+  "expo": {
+    "name": "finance-control-app",
+    "slug": "finance-control-app",
+    "version": "1.0.0",
+    "scheme": "financecontrol",
+    "extra": {
+      "API_URL": "https://www.api-qa.financecontrolapp.com.br",
+      "API_TIMEOUT": "30000",
+      "ENV": "qa"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "enableGooglePay": true
         }
+      ]
+    ],
+    "android": {
+      "package": "com.anonymous.financecontrolapp",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "financecontrol"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.anonymous.financecontrolapp",
+      "associatedDomains": [
+        "applinks:financecontrolapp.com.br"
+      ]
     }
+  }
 }

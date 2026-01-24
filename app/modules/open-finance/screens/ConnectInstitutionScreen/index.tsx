@@ -50,14 +50,12 @@ export const ConnectInstitutionScreen: React.FC = () => {
     const [step, setStep] = useState<'token' | 'connecting' | 'success'>('token');
     const [showWidget, setShowWidget] = useState(false);
 
-    // Generate OAuth callback URL - use explicit scheme for better compatibility
     const callbackUrl = Platform.select({
         ios: 'financecontrol://open-finance/oauth-callback',
         android: 'financecontrol://open-finance/oauth-callback',
         default: Linking.createURL('open-finance/oauth-callback'),
     });
 
-    // Handle deep link when user returns from bank OAuth
     useEffect(() => {
         const handleDeepLink = (event: { url: string }) => {
             const url = event.url;

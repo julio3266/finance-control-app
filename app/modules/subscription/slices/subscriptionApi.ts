@@ -46,6 +46,18 @@ export interface CheckoutResponse {
     url: string;
 }
 
+export interface PaymentIntentResponse {
+    clientSecret: string;
+    paymentIntentId: string;
+    amount: number;
+    currency: string;
+}
+
+export interface SetupIntentResponse {
+    clientSecret: string;
+    setupIntentId: string;
+}
+
 export interface PortalResponse {
     url: string;
 }
@@ -136,6 +148,66 @@ export const createCheckoutSession = createAsyncThunk<
             return rejectWithValue('Você já possui uma assinatura ativa');
         }
         return rejectWithValue(apiError.message || 'Erro ao criar sessão de checkout');
+    }
+});
+
+// Create setup intent (native SDK - for subscriptions)
+export const createSetupIntent = createAsyncThunk<
+    SetupIntentResponse,
+    void,
+    { state: RootState; rejectValue: string }
+>('subscription/createSetupIntent', async (_, { getState, rejectWithValue }) => {
+    try {
+        const { auth } = getState();
+        const token = (auth as { token: string | null }).token;
+
+        if (!token) {
+            return rejectWithValue('Token não encontrado');
+        }
+
+        const response = await apiClient.post<SetupIntentResponse>(
+            '/api/subscription/setup-intent',
+            {},
+            { Authorization: `Bearer ${token}` },
+        );
+
+        return response;
+    } catch (error) {
+        const apiError = error as ApiError;
+        if (apiError.message?.includes('already have an active subscription')) {
+            return rejectWithValue('Você já possui uma assinatura ativa');
+        }
+        return rejectWithValue(apiError.message || 'Erro ao criar setup intent');
+    }
+});
+
+// Create payment intent (native SDK - one-time payments only, NOT for subscriptions)
+export const createPaymentIntent = createAsyncThunk<
+    PaymentIntentResponse,
+    { amount: number; currency?: string },
+    { state: RootState; rejectValue: string }
+>('subscription/createPaymentIntent', async ({ amount, currency = 'brl' }, { getState, rejectWithValue }) => {
+    try {
+        const { auth } = getState();
+        const token = (auth as { token: string | null }).token;
+
+        if (!token) {
+            return rejectWithValue('Token não encontrado');
+        }
+
+        const response = await apiClient.post<PaymentIntentResponse>(
+            '/api/subscription/payment-intent',
+            { amount, currency },
+            { Authorization: `Bearer ${token}` },
+        );
+
+        return response;
+    } catch (error) {
+        const apiError = error as ApiError;
+        if (apiError.message?.includes('already have an active subscription')) {
+            return rejectWithValue('Você já possui uma assinatura ativa');
+        }
+        return rejectWithValue(apiError.message || 'Erro ao criar pagamento');
     }
 });
 

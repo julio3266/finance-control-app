@@ -5,10 +5,16 @@ export interface ApiError {
     status?: number;
 }
 
+type ErrorInterceptor = (error: ApiError, method: string, url: string) => void;
+type SuccessInterceptor = (method: string, url: string) => void;
+
 class ApiClient {
     private baseURL: string;
     private timeout: number;
     private token: string | null = null;
+    private errorInterceptors: ErrorInterceptor[] = [];
+    private successInterceptors: SuccessInterceptor[] = [];
+    private mutationMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
     constructor() {
         this.baseURL = config.apiUrl;
@@ -21,6 +27,36 @@ class ApiClient {
 
     getToken(): string | null {
         return this.token;
+    }
+
+    onError(callback: ErrorInterceptor) {
+        // Avoid duplicate interceptors
+        if (!this.errorInterceptors.includes(callback)) {
+            this.errorInterceptors.push(callback);
+        }
+    }
+
+    onSuccess(callback: SuccessInterceptor) {
+        // Avoid duplicate interceptors
+        if (!this.successInterceptors.includes(callback)) {
+            this.successInterceptors.push(callback);
+        }
+    }
+
+    clearInterceptors() {
+        this.errorInterceptors = [];
+        this.successInterceptors = [];
+    }
+
+    private notifyError(error: ApiError, method: string, url: string) {
+        this.errorInterceptors.forEach(callback => callback(error, method, url));
+    }
+
+    private notifySuccess(method: string, url: string) {
+        // Only notify success for mutations (POST, PUT, DELETE, PATCH), not GET requests
+        if (this.mutationMethods.includes(method)) {
+            this.successInterceptors.forEach(callback => callback(method, url));
+        }
     }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -85,10 +121,15 @@ class ApiClient {
                         `Erro ${response.status}: ${response.statusText}`,
                     status: response.status,
                 };
+                
+                this.notifyError(error, method, url);
                 throw error;
             }
 
             const data = await response.json();
+            
+            // Notify success interceptors for mutation operations
+            this.notifySuccess(method, url);
 
             return data;
         } catch (error) {
@@ -97,12 +138,20 @@ class ApiClient {
             if (error instanceof Error) {
                 if (error.name === 'AbortError') {
                     const apiError: ApiError = { message: 'Tempo de requisição excedido' };
+                    this.notifyError(apiError, method, url);
                     throw apiError;
                 }
 
                 const apiError: ApiError = { message: error.message };
+                this.notifyError(apiError, method, url);
                 throw apiError;
             }
+            
+            // If it's already an ApiError, notify
+            if ((error as ApiError).message) {
+                this.notifyError(error as ApiError, method, url);
+            }
+            
             throw error;
         }
     }

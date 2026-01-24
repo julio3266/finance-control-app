@@ -11,6 +11,10 @@ import { AppNavigator } from './navigation/AppNavigator';
 import { checkAndLogoutIfExpired, isSessionExpired } from './modules/auth/utils/sessionChecker';
 import { ToastProvider, useToast } from './utils/toast';
 import { setToastHandler } from './store/middleware';
+import { apiClient } from './utils/api';
+import { StripeProvider } from '@stripe/stripe-react-native';
+import { config } from './utils/config';
+import { SessionProvider } from './providers';
 
 function AppContent() {
     const isAuthenticated = useAppSelector<boolean>(
@@ -26,6 +30,32 @@ function AppContent() {
 
     useEffect(() => {
         setToastHandler(showToast);
+
+        apiClient.clearInterceptors();
+
+        const errorInterceptor = (error: any, method: string, url: string) => {
+            if (url.includes('/auth/')) return;
+
+            showToast(error.message || 'Erro ao processar requisição', 'error');
+        };
+
+        const successInterceptor = (method: string, url: string) => {
+            if (method === 'GET' || url.includes('/auth/')) return;
+
+            let message = 'Operação realizada com sucesso!';
+            if (method === 'POST' && url.includes('/investments')) {
+                message = 'Investimento criado com sucesso!';
+            } else if (method === 'PUT' && url.includes('/investments')) {
+                message = 'Investimento atualizado com sucesso!';
+            } else if (method === 'DELETE' && url.includes('/investments')) {
+                message = 'Investimento deletado com sucesso!';
+            }
+
+            showToast(message, 'success');
+        };
+
+        apiClient.onError(errorInterceptor);
+        apiClient.onSuccess(successInterceptor);
     }, [showToast]);
 
     useEffect(() => {
@@ -54,11 +84,18 @@ export default function App() {
     return (
         <Provider store={store}>
             <PersistGate loading={<ActivityIndicator size="large" />} persistor={persistor}>
-                <SafeAreaProvider>
-                    <ToastProvider>
-                        <AppContent />
-                    </ToastProvider>
-                </SafeAreaProvider>
+                <SessionProvider>
+                    <SafeAreaProvider>
+                        <StripeProvider
+                            publishableKey={config.stripePublishableKey}
+                            urlScheme="financecontrol"
+                        >
+                            <ToastProvider>
+                                <AppContent />
+                            </ToastProvider>
+                        </StripeProvider>
+                    </SafeAreaProvider>
+                </SessionProvider>
             </PersistGate>
         </Provider>
     );

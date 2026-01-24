@@ -39,14 +39,19 @@ export const CheckoutWebView: React.FC<CheckoutWebViewProps> = ({
     const handleNavigationStateChange = (navState: WebViewNavigation) => {
         const { url: currentUrl } = navState;
 
+        if (!currentUrl) return;
 
-        // Detectar URLs de sucesso ou cancelamento do Stripe
-        if (currentUrl.includes('/subscription/success') || currentUrl.includes('checkout.stripe.com') && currentUrl.includes('success')) {
-            onSuccess?.();
-            onClose();
-        } else if (currentUrl.includes('/subscription/cancel') || currentUrl.includes('canceled')) {
-            onCancel?.();
-            onClose();
+
+        if (currentUrl.includes('financecontrolapp.com.br/subscription/success')) {
+            setTimeout(() => {
+                onSuccess?.();
+                onClose();
+            }, 500);
+        } else if (currentUrl.includes('financecontrolapp.com.br/subscription/cancel')) {
+            setTimeout(() => {
+                onCancel?.();
+                onClose();
+            }, 500);
         }
     };
 
@@ -199,31 +204,38 @@ export const CheckoutWebView: React.FC<CheckoutWebViewProps> = ({
                             ref={webViewRef}
                             source={{ uri: url }}
                             style={styles.webview}
+                            userAgent="Mozilla/5.0 (Linux; Android 4.4.4; One Build/KTU84L.H4) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/28.0.0.20.16;]"
                             onLoadStart={() => setLoading(true)}
                             onLoadEnd={() => setLoading(false)}
                             onNavigationStateChange={handleNavigationStateChange}
                             onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
                             onError={handleError}
                             onHttpError={handleError}
-                            javaScriptEnabled
-                            domStorageEnabled
+                            javaScriptEnabled={true}
+                            domStorageEnabled={true}
                             startInLoadingState={false}
-                            scalesPageToFit={false}
-                            sharedCookiesEnabled
-                            thirdPartyCookiesEnabled
-                            mixedContentMode="always"
-                            allowsInlineMediaPlayback
+                            scalesPageToFit={true}
+                            sharedCookiesEnabled={true}
+                            thirdPartyCookiesEnabled={true}
+                            mixedContentMode="compatibility"
+                            allowsInlineMediaPlayback={true}
                             mediaPlaybackRequiresUserAction={false}
                             originWhitelist={['*']}
                             allowsBackForwardNavigationGestures={false}
                             bounces={false}
-                            scrollEnabled
+                            scrollEnabled={true}
                             automaticallyAdjustContentInsets={false}
                             contentInsetAdjustmentBehavior="never"
                             keyboardDisplayRequiresUserAction={false}
                             hideKeyboardAccessoryView={false}
                             allowsLinkPreview={false}
-                            textInteractionEnabled
+                            textInteractionEnabled={true}
+                            cacheEnabled={false}
+                            incognito={false}
+                            setSupportMultipleWindows={false}
+                            androidLayerType="hardware"
+                            androidHardwareAccelerationDisabled={false}
+                            nestedScrollEnabled={true}
                         />
                     </KeyboardAvoidingView>
                 )}

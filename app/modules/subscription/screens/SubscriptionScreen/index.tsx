@@ -21,14 +21,18 @@ import {
     fetchPlans,
     fetchSubscriptionInfo,
     createCheckoutSession,
+    createSetupIntent,
+    createPaymentIntent,
     openStripePortal,
     cancelSubscription,
     reactivateSubscription,
     clearCheckoutUrl,
+    clearClientSecret,
     clearPortalUrl,
 } from '@app/modules/subscription/slices';
-import { fetchUserProfile } from '@app/modules/profile/slices';
-import { CheckoutWebView, SubscriptionSuccessModal } from '@app/modules/subscription/components';
+import { fetchUserProfile, setPremiumStatus } from '@app/modules/profile/slices';
+import { fetchFinanceOverview } from '@app/modules/dashboard/slices/financeApi';
+import { CheckoutWebView, StripeCheckout } from '@app/modules/subscription/components';
 import { styles } from './styles';
 
 export default function SubscriptionScreen() {
@@ -42,6 +46,7 @@ export default function SubscriptionScreen() {
         plans,
         subscriptionInfo,
         checkoutUrl,
+        clientSecret,
         portalUrl,
         plansLoading,
         checkoutLoading,
@@ -57,7 +62,7 @@ export default function SubscriptionScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
     const [showWebView, setShowWebView] = useState(false);
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showStripeCheckout, setShowStripeCheckout] = useState(false);
 
     // Load data on mount
     useEffect(() => {
@@ -73,6 +78,13 @@ export default function SubscriptionScreen() {
             dispatch(clearCheckoutUrl());
         }
     }, [checkoutUrl, dispatch]);
+
+    // Handle client secret - show native Stripe checkout
+    useEffect(() => {
+        if (clientSecret) {
+            setShowStripeCheckout(true);
+        }
+    }, [clientSecret]);
 
     // Handle portal URL - open in browser (Stripe portal works better externally)
     useEffect(() => {
@@ -94,7 +106,7 @@ export default function SubscriptionScreen() {
         await Promise.all([
             dispatch(fetchPlans()),
             dispatch(fetchSubscriptionInfo()),
-            dispatch(fetchUserProfile()),
+            // fetchUserProfile removido - já atualiza via useFocusEffect do Dashboard
         ]);
         setRefreshing(false);
     }, [dispatch]);
@@ -106,9 +118,15 @@ export default function SubscriptionScreen() {
         }
 
         try {
-            await dispatch(createCheckoutSession()).unwrap();
+            // Try native SDK first (Setup Intent for recurring subscriptions)
+            await dispatch(createSetupIntent()).unwrap();
         } catch (err) {
-            // Error handled by useEffect
+            // Fallback to WebView (Checkout Session) if Setup Intent fails
+            try {
+                await dispatch(createCheckoutSession()).unwrap();
+            } catch (fallbackErr) {
+                // Error handled by global interceptor
+            }
         }
     };
 
@@ -152,7 +170,7 @@ export default function SubscriptionScreen() {
             await dispatch(reactivateSubscription()).unwrap();
             Alert.alert('Sucesso', 'Sua assinatura foi reativada!');
             dispatch(fetchSubscriptionInfo());
-            dispatch(fetchUserProfile());
+            // Profile atualiza automaticamente no Dashboard
         } catch (err) {
             // Error handled by useEffect
         }
@@ -163,23 +181,24 @@ export default function SubscriptionScreen() {
         setWebViewUrl(null);
     };
 
-    const handleCheckoutSuccess = async () => {
-        // Show success modal
-        setShowSuccessModal(true);
-        // Refresh subscription info and profile in background
-        await Promise.all([
-            dispatch(fetchSubscriptionInfo()),
-            dispatch(fetchUserProfile()),
-        ]);
+    const handleStripeCheckoutClose = () => {
+        setShowStripeCheckout(false);
+        dispatch(clearClientSecret());
     };
 
-    const handleSuccessComplete = () => {
-        setShowSuccessModal(false);
-        // Navigate to home
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Drawer' }],
-        });
+    const handleCheckoutSuccess = async () => {
+        // Atualiza o status premium imediatamente (otimista)
+        dispatch(setPremiumStatus(true));
+
+        // Refresh subscription info in background
+        await dispatch(fetchSubscriptionInfo());
+
+        // Reload home data to show premium features
+        dispatch(fetchFinanceOverview());
+        dispatch(fetchUserProfile()).catch(() => { });
+
+        // Navigate to success screen
+        navigation.navigate('SubscriptionSuccess' as any);
     };
 
     const handleCheckoutCancel = () => {
@@ -438,8 +457,8 @@ export default function SubscriptionScreen() {
                     {premiumPlan?.features && premiumPlan.features.length > 0 ? (
                         [...premiumPlan.features]
                             .sort((a, b) => a.sortOrder - b.sortOrder)
-                            .map((feature) => (
-                                <View style={styled.featureItem} key={feature.id}>
+                            .map((feature, index) => (
+                                <View style={styled.featureItem} key={`${feature.id}-${index}`}>
                                     <View style={styled.featureIcon}>
                                         <Text style={styled.featureEmoji}>{feature.icon}</Text>
                                     </View>
@@ -508,7 +527,17 @@ export default function SubscriptionScreen() {
                 </Text>
             </ScrollView>
 
-            {/* Checkout WebView Modal */}
+            {/* Native Stripe Checkout Modal */}
+            {clientSecret && (
+                <StripeCheckout
+                    visible={showStripeCheckout}
+                    clientSecret={clientSecret}
+                    onClose={handleStripeCheckoutClose}
+                    onSuccess={handleCheckoutSuccess}
+                />
+            )}
+
+            {/* Checkout WebView Modal (fallback) */}
             {webViewUrl && (
                 <CheckoutWebView
                     visible={showWebView}
@@ -518,12 +547,6 @@ export default function SubscriptionScreen() {
                     onCancel={handleCheckoutCancel}
                 />
             )}
-
-            {/* Success Modal */}
-            <SubscriptionSuccessModal
-                visible={showSuccessModal}
-                onComplete={handleSuccessComplete}
-            />
         </ScreenWithHeader>
     );
 }

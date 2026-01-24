@@ -21,6 +21,11 @@ const profileSlice = createSlice({
             state.profile = null;
             state.error = null;
         },
+        setPremiumStatus: (state, action: { payload: boolean }) => {
+            if (state.profile) {
+                state.profile.isPremium = action.payload;
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -39,5 +44,5 @@ const profileSlice = createSlice({
     },
 });
 
-export const { clearProfile } = profileSlice.actions;
+export const { clearProfile, setPremiumStatus } = profileSlice.actions;
 export default profileSlice.reducer;

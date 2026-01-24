@@ -14,7 +14,7 @@ import { FabMenu } from '../FabMenu';
 import { useDrawer } from '@app/navigation/DrawerNavigation/DrawerContext';
 import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
 import { CreditCardCreationModal } from '@app/modules/credit-card/components/CreditCardCreationModal';
-import { TransactionCreationModal, type TransactionModalType } from '@app/modules/shared/components';
+import { TransactionCreationModal } from '@app/modules/shared/components';
 import { fetchUserProfile } from '@app/modules/profile/slices';
 
 type MainStackNavigationProp = NativeStackNavigationProp<MainStackParamList>;

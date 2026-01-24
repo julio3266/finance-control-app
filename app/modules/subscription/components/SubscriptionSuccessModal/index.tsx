@@ -5,6 +5,7 @@ import {
     Modal,
     StyleSheet,
     Animated,
+    TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
@@ -72,13 +73,6 @@ export const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> =
                     useNativeDriver: true,
                 }),
             ]).start();
-
-            // Auto navigate after 4 seconds
-            const timer = setTimeout(() => {
-                onComplete();
-            }, 4000);
-
-            return () => clearTimeout(timer);
         }
     }, [visible]);
 
@@ -156,12 +150,24 @@ export const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> =
             color: '#ffffff',
             flex: 1,
         },
-        redirectText: {
+        button: {
             position: 'absolute',
             bottom: insets.bottom + 40,
-            fontSize: 14,
-            color: 'rgba(255, 255, 255, 0.5)',
-            textAlign: 'center',
+            width: '100%',
+            backgroundColor: colors.primary[600],
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+            shadowColor: colors.primary[600],
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 5,
+        },
+        buttonText: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: '#ffffff',
         },
         premiumBadge: {
             flexDirection: 'row',
@@ -231,9 +237,13 @@ export const SubscriptionSuccessModal: React.FC<SubscriptionSuccessModalProps> =
                     </Animated.View>
                 </View>
 
-                <Text style={styles.redirectText}>
-                    Redirecionando para a tela inicial...
-                </Text>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={onComplete}
+                    activeOpacity={0.8}
+                >
+                    <Text style={styles.buttonText}>Ir para Início</Text>
+                </TouchableOpacity>
             </Animated.View>
         </Modal>
     );

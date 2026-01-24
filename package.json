@@ -23,6 +23,7 @@
         "@react-navigation/native": "^6.1.18",
         "@react-navigation/native-stack": "^6.11.0",
         "@reduxjs/toolkit": "^2.2.7",
+        "@stripe/stripe-react-native": "0.50.3",
         "@types/redux-persist": "^4.3.1",
         "expo": "~54.0.31",
         "expo-constants": "~18.0.13",

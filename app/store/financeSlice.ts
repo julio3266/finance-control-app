@@ -10,6 +10,7 @@ import {
 } from '@app/modules/dashboard/slices/financeApi';
 
 interface FinanceState {
+    financeOverviewResponse: FinanceOverviewResponse | null;
     income: number;
     expenses: number;
     balance: number;
@@ -26,6 +27,7 @@ interface FinanceState {
 }
 
 const initialState: FinanceState = {
+    financeOverviewResponse: null,
     income: 0,
     expenses: 0,
     balance: 0,
@@ -73,6 +75,7 @@ const financeSlice = createSlice({
             })
             .addCase(fetchFinanceOverview.fulfilled, (state, action) => {
                 state.loading = false;
+                state.financeOverviewResponse = action.payload;
                 state.balance = action.payload.totalBalance;
                 state.income = action.payload.totalIncome;
                 state.expenses = action.payload.totalExpenses;
