@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
     View,
     Text,
@@ -8,9 +8,8 @@ import {
     ActivityIndicator,
     Image,
 } from 'react-native';
-import { IHandles } from 'react-native-modalize/lib/options';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, CommonActions } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
@@ -18,10 +17,7 @@ import { colors } from '@app/utils/colors';
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { fetchConnectors, setSearchQuery, resetConnectors, type Connector } from '../../slices';
 import type { OpenFinanceStackParamList } from '../../routes';
-import { ConnectInstitutionBottomSheet } from '../../components/ConnectInstitutionBottomSheet';
 import { styles } from './styles';
-
-const ITEMS_PER_PAGE = 20;
 
 type ConnectAccountsRouteProp = RouteProp<OpenFinanceStackParamList, 'ConnectAccounts'>;
 
@@ -51,34 +47,46 @@ export const ConnectAccountsScreen: React.FC = () => {
     const dispatch = useAppDispatch();
     const styled = styles(theme);
 
+    const profile = useAppSelector((state) => state.profile.profile);
+    const isPremium = profile?.isPremium ?? false;
+
     const connectors = useAppSelector((state) => state.openFinance.connectors);
     const loading = useAppSelector((state) => state.openFinance.connectorsLoading);
     const searchQuery = useAppSelector((state) => state.openFinance.searchQuery);
-    const pagination = useAppSelector((state) => state.openFinance.pagination);
-
     const [searchText, setSearchText] = useState('');
     const [logoErrors, setLogoErrors] = useState<Record<number, boolean>>({});
-    const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const flatListRef = useRef<FlatList>(null);
-    const connectInstitutionModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
 
     const onlyCreditCards = route.params?.onlyCreditCards ?? false;
+    const filteredConnectors = useMemo(() => {
+        if (!onlyCreditCards) return connectors;
+        return connectors.filter((connector) => connector.supportsCreditCards);
+    }, [connectors, onlyCreditCards]);
 
-    // Buscar connectors iniciais
+    // Redirect non-premium users to subscription immediately
     useEffect(() => {
-        dispatch(resetConnectors());
-        dispatch(
-            fetchConnectors({
-                page: 1,
-                pageSize: ITEMS_PER_PAGE,
-                onlyCreditCards,
-            }),
-        );
-    }, [dispatch, onlyCreditCards]);
+        if (!isPremium) {
+            navigation.goBack();
+            // Small delay to ensure goBack completes before navigating
+            setTimeout(() => {
+                (navigation as any).navigate('Subscription', { screen: 'Subscription' });
+            }, 100);
+        }
+    }, [isPremium, navigation]);
 
-    // Debounce para busca
     useEffect(() => {
+        // Only fetch connectors if user is premium
+        if (isPremium) {
+            dispatch(resetConnectors());
+            dispatch(fetchConnectors());
+        }
+    }, [dispatch, isPremium]);
+
+    useEffect(() => {
+        // Only handle search if user is premium
+        if (!isPremium) return;
+
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
@@ -86,13 +94,7 @@ export const ConnectAccountsScreen: React.FC = () => {
         if (searchText.trim().length === 0) {
             dispatch(setSearchQuery(''));
             dispatch(resetConnectors());
-            dispatch(
-                fetchConnectors({
-                    page: 1,
-                    pageSize: ITEMS_PER_PAGE,
-                    onlyCreditCards,
-                }),
-            );
+            dispatch(fetchConnectors());
             return;
         }
 
@@ -106,9 +108,6 @@ export const ConnectAccountsScreen: React.FC = () => {
             dispatch(
                 fetchConnectors({
                     search: searchText.trim(),
-                    page: 1,
-                    pageSize: ITEMS_PER_PAGE,
-                    onlyCreditCards,
                 }),
             );
         }, 500);
@@ -118,34 +117,24 @@ export const ConnectAccountsScreen: React.FC = () => {
                 clearTimeout(debounceRef.current);
             }
         };
-    }, [searchText, dispatch, onlyCreditCards]);
-
-    const handleLoadMore = useCallback(() => {
-        if (!loading && pagination?.hasNextPage) {
-            const nextPage = pagination.currentPage + 1;
-            dispatch(
-                fetchConnectors({
-                    search: searchQuery || undefined,
-                    page: nextPage,
-                    pageSize: ITEMS_PER_PAGE,
-                    onlyCreditCards,
-                }),
-            );
-        }
-    }, [loading, pagination, searchQuery, dispatch, onlyCreditCards]);
+    }, [searchText, dispatch, isPremium]);
 
     const handleInstitutionPress = (connector: Connector) => {
-        setSelectedConnector(connector);
-        // O BottomSheet será aberto automaticamente via useEffect quando connector mudar
-    };
-
-    const handleConnectionSuccess = () => {
-        // Recarregar lista de connectors se necessário
+        const onlyCreditCards = route.params?.onlyCreditCards ?? false;
+        (navigation as any).navigate('ConnectInstitution', {
+            connector,
+            products: onlyCreditCards ? ['CREDIT_CARDS'] : undefined,
+        });
     };
 
     const handleBack = () => {
         navigation.goBack();
     };
+
+    // Don't render anything if not premium (will redirect)
+    if (!isPremium) {
+        return null;
+    }
 
     const renderInstitutionItem = ({ item }: { item: Connector }) => {
         const hasLogoError = logoErrors[item.id];
@@ -189,15 +178,6 @@ export const ConnectAccountsScreen: React.FC = () => {
                 </View>
                 <Feather name="chevron-right" size={20} color={theme.foregroundMuted} />
             </TouchableOpacity>
-        );
-    };
-
-    const renderFooter = () => {
-        if (!loading) return null;
-        return (
-            <View style={styled.footerLoader}>
-                <ActivityIndicator size="small" color={theme.foreground} />
-            </View>
         );
     };
 
@@ -303,26 +283,17 @@ export const ConnectAccountsScreen: React.FC = () => {
 
             <FlatList
                 ref={flatListRef}
-                data={connectors}
+                data={filteredConnectors}
                 renderItem={renderInstitutionItem}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styled.listContent}
                 showsVerticalScrollIndicator={false}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.5}
-                ListFooterComponent={renderFooter}
                 ListEmptyComponent={renderEmpty}
                 removeClippedSubviews
                 maxToRenderPerBatch={10}
                 windowSize={10}
             />
 
-            <ConnectInstitutionBottomSheet
-                modalizeRef={connectInstitutionModalRef}
-                connector={selectedConnector}
-                onSuccess={handleConnectionSuccess}
-                onClose={() => setSelectedConnector(null)}
-            />
         </View>
     );
 };

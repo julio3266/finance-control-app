@@ -109,10 +109,6 @@ export const fetchRecentTransactions = createAsyncThunk<
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao buscar transações recentes';
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.error('Recent Transactions Error:', errorMessage, error);
-        }
         return rejectWithValue(errorMessage);
     }
 });
@@ -158,10 +154,6 @@ export const createTransaction = createAsyncThunk<
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao criar transação';
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.error('Create Transaction Error:', errorMessage, error);
-        }
         return rejectWithValue(errorMessage);
     }
 });
@@ -187,10 +179,7 @@ export const fetchCategories = createAsyncThunk<
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao buscar categorias';
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.error('Fetch Categories Error:', errorMessage, error);
-        }
+
         return rejectWithValue(errorMessage);
     }
 });

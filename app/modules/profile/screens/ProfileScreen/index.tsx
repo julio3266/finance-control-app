@@ -1,16 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useThemeMode } from '@app/utils/useTheme';
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { useNavigation } from '@react-navigation/native';
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { styles } from './styles';
 import { colors } from '@app/utils/colors';
 import { logout } from '@app/modules/auth/slices';
 import { toggleTheme } from '@app/store/themeSlice';
 import { useDrawer } from '@app/navigation/DrawerNavigation/DrawerContext';
 import { fetchUserProfile } from '@app/modules/profile/slices';
+import { apiClient } from '@app/utils/api';
 
 interface MenuItemProps {
     icon: React.ReactNode;
@@ -44,10 +46,10 @@ const MenuItem: React.FC<MenuItemProps> = ({
             style={[
                 styled.menuItem,
                 isLogout &&
-                    isDark && {
-                        backgroundColor: '#1a1a2e',
-                        borderColor: '#2a2a3e',
-                    },
+                isDark && {
+                    backgroundColor: '#1a1a2e',
+                    borderColor: '#2a2a3e',
+                },
             ]}
             onPress={onPress}
             activeOpacity={0.7}
@@ -94,6 +96,7 @@ export default function ProfileScreen() {
     }, [dispatch, profile, profileLoading]);
 
     const handleLogout = () => {
+        apiClient.setToken(null);
         dispatch(logout());
     };
 
@@ -110,48 +113,73 @@ export default function ProfileScreen() {
         closeDrawer();
     };
 
-    const menuItems: {
-        id: string;
-        label: string;
-        icon: React.ReactNode;
-        iconBg: string;
-        onPress: () => void;
-        showSwitch?: boolean;
-        switchValue?: boolean;
-        onSwitchChange?: (value: boolean) => void;
-    }[] = [
-        {
-            id: '1',
-            label: 'Informações pessoais',
-            icon: <Feather name="user" size={20} color="#ffffff" />,
-            iconBg: colors.primary[600],
-            onPress: () => {},
-        },
-        {
-            id: '3',
-            label: 'Tema',
-            icon: <Feather name="lock" size={20} color="#ffffff" />,
-            iconBg: colors.primary[800],
-            onPress: () => {},
-            showSwitch: true,
-            switchValue: themeMode === 'dark',
-            onSwitchChange: handleThemeToggle,
-        },
-        {
-            id: '5',
-            label: 'Settings',
-            icon: <Feather name="settings" size={20} color="#ffffff" />,
-            iconBg: '#14B8A6',
-            onPress: () => {},
-        },
-        {
-            id: '6',
-            label: 'Sair',
-            icon: <Feather name="power" size={20} color="#ffffff" />,
-            iconBg: colors.error[500],
-            onPress: () => handleLogout(),
-        },
-    ];
+    const handleMyConnections = () => {
+        (navigation as any).navigate('OpenFinance', { screen: 'MyConnections' });
+        closeDrawer();
+    };
+
+    const isPremium = profile?.isPremium ?? false;
+
+    const menuItems = useMemo(() => {
+        const items: {
+            id: string;
+            label: string;
+            icon: React.ReactNode;
+            iconBg: string;
+            onPress: () => void;
+            showSwitch?: boolean;
+            switchValue?: boolean;
+            onSwitchChange?: (value: boolean) => void;
+        }[] = [
+                {
+                    id: '1',
+                    label: 'Informações pessoais',
+                    icon: <Feather name="user" size={20} color="#ffffff" />,
+                    iconBg: colors.primary[600],
+                    onPress: () => { },
+                },
+                {
+                    id: '3',
+                    label: 'Tema',
+                    icon: <Feather name="lock" size={20} color="#ffffff" />,
+                    iconBg: colors.primary[800],
+                    onPress: () => { },
+                    showSwitch: true,
+                    switchValue: themeMode === 'dark',
+                    onSwitchChange: handleThemeToggle,
+                },
+            ];
+
+        // Adicionar "Minhas conexões" apenas para usuários premium
+        if (isPremium) {
+            items.push({
+                id: '4',
+                label: 'Minhas conexões',
+                icon: <FontAwesome6 name="link" size={18} color="#ffffff" />,
+                iconBg: '#9333EA',
+                onPress: handleMyConnections,
+            });
+        }
+
+        items.push(
+            {
+                id: '5',
+                label: 'Settings',
+                icon: <Feather name="settings" size={20} color="#ffffff" />,
+                iconBg: '#14B8A6',
+                onPress: () => { },
+            },
+            {
+                id: '6',
+                label: 'Sair',
+                icon: <Feather name="power" size={20} color="#ffffff" />,
+                iconBg: colors.error[500],
+                onPress: () => handleLogout(),
+            },
+        );
+
+        return items;
+    }, [isPremium, themeMode]);
 
     const getDisplayName = () => {
         if (profile?.userInfo) {

@@ -17,7 +17,20 @@
             "@assets/*": ["./app/assets/*"],
             "@app/*": ["./app/*"],
             "@modules/*": ["./app/modules/*"],
-            "@auth/*": ["./app/modules/auth/*"]
+            "@auth/*": ["./app/modules/auth/*"],
+            "@accounts/*": ["./app/modules/accounts/*"],
+            "@credit-card/*": ["./app/modules/credit-card/*"],
+            "@budget/*": ["./app/modules/budget/*"],
+            "@more/*": ["./app/modules/more/*"],
+            "@profile/*": ["./app/modules/profile/*"],
+            "@open-finance/*": ["./app/modules/open-finance/*"],
+            "@extract/*": ["./app/modules/extract/*"],
+            "@expenses/*": ["./app/modules/expenses/*"],
+            "@incomes/*": ["./app/modules/incomes/*"],
+            "@store/*": ["./app/store/*"],
+            "@ui/*": ["./app/ui/*"],
+            "@utils/*": ["./app/utils/*"]
+
         }
     },
     "extends": "expo/tsconfig.base",

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
     View,
     Text,
@@ -6,37 +6,26 @@ import {
     ActivityIndicator,
     ScrollView,
     Image,
-    Linking,
-    Dimensions,
+    Platform,
 } from 'react-native';
-import { Modalize } from 'react-native-modalize';
-import { IHandles } from 'react-native-modalize/lib/options';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 import Feather from '@expo/vector-icons/Feather';
-import { useTheme } from '@app/utils/useTheme';
+import { useTheme, useThemeMode } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { useAppDispatch, useAppSelector } from '@app/store';
 import { fetchConnectToken, createConnection, type Connector } from '../../slices';
+import { PluggyConnect } from 'react-native-pluggy-connect';
+import { ScreenWithHeader } from '@app/modules/Home/components';
 import { styles } from './styles';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// WebView será importado quando react-native-webview estiver instalado
-// Para instalar: npm install react-native-webview
-// Depois, descomentar a linha abaixo e remover o try/catch
-// import { WebView } from 'react-native-webview';
-let WebView: any = null;
-try {
-    WebView = require('react-native-webview').WebView;
-} catch {
-    // WebView não está instalado ainda
-}
+import type { PluggyProduct } from '../../routes/openFinanceRoutes';
 
 type ConnectInstitutionRouteProp = RouteProp<
     {
         ConnectInstitution: {
             connector: Connector;
+            products?: PluggyProduct[];
         };
     },
     'ConnectInstitution'
@@ -44,13 +33,13 @@ type ConnectInstitutionRouteProp = RouteProp<
 
 export const ConnectInstitutionScreen: React.FC = () => {
     const theme = useTheme();
-    const insets = useSafeAreaInsets();
+    const themeMode = useThemeMode();
     const navigation = useNavigation();
     const route = useRoute<ConnectInstitutionRouteProp>();
     const dispatch = useAppDispatch();
     const styled = styles(theme);
 
-    const { connector } = route.params;
+    const { connector, products } = route.params;
 
     const connectToken = useAppSelector((state) => state.openFinance.connectToken);
     const connectTokenLoading = useAppSelector((state) => state.openFinance.connectTokenLoading);
@@ -59,8 +48,44 @@ export const ConnectInstitutionScreen: React.FC = () => {
 
     const [logoError, setLogoError] = useState(false);
     const [step, setStep] = useState<'token' | 'connecting' | 'success'>('token');
-    const widgetModalRef = useRef<IHandles>(null);
-    const webViewRef = useRef<any>(null);
+    const [showWidget, setShowWidget] = useState(false);
+
+    // Generate OAuth callback URL - use explicit scheme for better compatibility
+    const callbackUrl = Platform.select({
+        ios: 'financecontrol://open-finance/oauth-callback',
+        android: 'financecontrol://open-finance/oauth-callback',
+        default: Linking.createURL('open-finance/oauth-callback'),
+    });
+
+    // Handle deep link when user returns from bank OAuth
+    useEffect(() => {
+        const handleDeepLink = (event: { url: string }) => {
+            const url = event.url;
+
+            // Check if this is an OAuth callback
+            if (url.includes('oauth-callback') || url.includes('open-finance/connect')) {
+                // If we have the widget open, it will handle the OAuth response
+                // If not, we might need to reopen it
+                if (!showWidget && step === 'connecting') {
+                    setShowWidget(true);
+                }
+            }
+        };
+
+        const subscription = Linking.addEventListener('url', handleDeepLink);
+
+        // Check if app was opened via deep link while on this screen
+        Linking.getInitialURL().then((url) => {
+            if (url) {
+                console.log('🔗 [Open Finance] Initial URL:', url);
+                handleDeepLink({ url });
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [showWidget, step]);
 
     useEffect(() => {
         dispatch(fetchConnectToken());
@@ -77,35 +102,19 @@ export const ConnectInstitutionScreen: React.FC = () => {
     };
 
     const handleOpenWidget = () => {
-        if (!connectToken) {
+        if (!connectToken || !connector) {
             return;
         }
 
-        widgetModalRef.current?.open();
+        setShowWidget(true);
     };
 
-    const handleWidgetMessage = (event: any) => {
-        try {
-            const data = JSON.parse(event.nativeEvent.data);
+    const handlePluggySuccess = (data: { item: { id: string } }) => {
+        if (!connector) return;
 
-            // Pluggy widget envia eventos via postMessage
-            if (data.type === 'PLUGGY_CONNECT_SUCCESS') {
-                const { itemId } = data;
-                handleWidgetSuccess(itemId);
-            } else if (data.type === 'PLUGGY_CONNECT_ERROR') {
-                handleWidgetError();
-            } else if (data.type === 'PLUGGY_CONNECT_CLOSE') {
-                widgetModalRef.current?.close();
-            }
-        } catch {
-            // Ignorar mensagens que não são JSON válido
-        }
-    };
+        setShowWidget(false);
 
-    const handleWidgetSuccess = (itemId: string) => {
-        widgetModalRef.current?.close();
-
-        // Remove o prefixo "item_" se existir, pois o backend espera apenas o UUID
+        const itemId = data.item.id;
         const pluggyItemId = itemId.startsWith('item_') ? itemId.replace('item_', '') : itemId;
 
         dispatch(
@@ -119,37 +128,36 @@ export const ConnectInstitutionScreen: React.FC = () => {
         setStep('success');
     };
 
-    const handleWidgetError = () => {
-        widgetModalRef.current?.close();
-        // TODO: Mostrar erro ao usuário
+    const handlePluggyError = () => {
+        setShowWidget(false);
     };
 
-    const getPluggyWidgetUrl = () => {
-        if (!connectToken) return '';
-        // URL do widget Pluggy Connect
-        // Em produção, usar a URL correta da Pluggy conforme documentação
-        return `https://cdn.pluggy.ai/connect-widget/index.html?connectToken=${connectToken}`;
-    };
-
-    const handleOpenInBrowser = async () => {
-        if (!connectToken) return;
-        const url = getPluggyWidgetUrl();
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-            await Linking.openURL(url);
-        }
+    const handlePluggyClose = () => {
+        setShowWidget(false);
     };
 
     const handleContinue = () => {
-        // Sincronizar a conexão criada
-        // TODO: Obter o ID da conexão criada e sincronizar
-        (navigation as any).navigate('OpenFinance', { screen: 'ConnectAccounts' });
+        // Navigate to Home (Dashboard)
+        (navigation as any).reset({
+            index: 0,
+            routes: [{ name: 'Drawer' }],
+        });
     };
 
     const formatColor = (color?: string): string => {
         if (!color) return colors.primary[600];
         if (color.startsWith('#')) return color;
         return `#${color}`;
+    };
+
+    const formatInstitutionType = (type: string): string => {
+        const typeMap: Record<string, string> = {
+            PERSONAL_BANK: 'Pessoa Física',
+            BUSINESS_BANK: 'Pessoa Jurídica',
+            INVESTMENT: 'Investimento',
+        };
+
+        return typeMap[type] || type;
     };
 
     const renderLogo = () => {
@@ -284,90 +292,67 @@ export const ConnectInstitutionScreen: React.FC = () => {
         return null;
     };
 
-    return (
-        <View style={[styled.container, { paddingTop: insets.top }]}>
-            {/* Header */}
-            <View style={styled.header}>
+    const renderHeader = () => (
+        <View style={styled.header}>
+            <TouchableOpacity
+                onPress={handleBack}
+                style={styled.backButton}
+                activeOpacity={0.7}
+            >
+                <Feather name="arrow-left" size={24} color={theme.foreground} />
+            </TouchableOpacity>
+            <Text style={styled.headerTitle}>Conectar instituição</Text>
+            {showWidget ? (
                 <TouchableOpacity
-                    onPress={handleBack}
+                    onPress={handlePluggyClose}
                     style={styled.backButton}
                     activeOpacity={0.7}
                 >
-                    <Feather name="arrow-left" size={24} color={theme.foreground} />
+                    <Feather name="x" size={24} color={theme.foreground} />
                 </TouchableOpacity>
-                <Text style={styled.headerTitle}>Conectar instituição</Text>
+            ) : (
                 <View style={styled.backButton} />
-            </View>
-
-            <ScrollView
-                style={styled.scrollView}
-                contentContainerStyle={styled.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* Institution Info */}
-                <View style={styled.institutionCard}>
-                    <View style={styled.logoContainer}>{renderLogo()}</View>
-                    <Text style={styled.institutionName}>{connector.name}</Text>
-                    <Text style={styled.institutionType}>{connector.type}</Text>
-                </View>
-
-                {/* Content */}
-                {renderContent()}
-            </ScrollView>
-
-            {/* Pluggy Widget BottomSheet */}
-            <Modalize
-                ref={widgetModalRef}
-                modalHeight={SCREEN_HEIGHT * 0.9}
-                modalStyle={styled.bottomSheet}
-                handleStyle={styled.handle}
-                overlayStyle={styled.overlay}
-                HeaderComponent={
-                    <View style={styled.bottomSheetHeader}>
-                        <Text style={styled.bottomSheetTitle}>Conectar com {connector.name}</Text>
-                        <TouchableOpacity
-                            onPress={() => widgetModalRef.current?.close()}
-                            style={styled.bottomSheetCloseButton}
-                        >
-                            <Feather name="x" size={24} color={theme.foreground} />
-                        </TouchableOpacity>
-                    </View>
-                }
-            >
-                {connectToken && WebView ? (
-                    <WebView
-                        ref={webViewRef}
-                        source={{ uri: getPluggyWidgetUrl() }}
-                        style={styled.webView}
-                        onMessage={handleWidgetMessage}
-                        javaScriptEnabled
-                        domStorageEnabled
-                        startInLoadingState
-                        renderLoading={() => (
-                            <View style={styled.webViewLoading}>
-                                <ActivityIndicator size="large" color={theme.foreground} />
-                            </View>
-                        )}
-                    />
-                ) : connectToken ? (
-                    <View style={styled.webViewFallback}>
-                        <Text style={styled.webViewFallbackText}>
-                            Para usar o widget Pluggy, é necessário instalar react-native-webview
-                        </Text>
-                        <TouchableOpacity
-                            style={styled.openBrowserButton}
-                            onPress={handleOpenInBrowser}
-                        >
-                            <Text style={styled.openBrowserButtonText}>Abrir no navegador</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <View style={styled.webViewFallback}>
-                        <ActivityIndicator size="large" color={theme.foreground} />
-                        <Text style={styled.webViewFallbackText}>Carregando...</Text>
-                    </View>
-                )}
-            </Modalize>
+            )}
         </View>
+    );
+
+    return (
+        <ScreenWithHeader customHeader={renderHeader()}>
+            {showWidget && connectToken && connector ? (
+                <View style={styled.widgetContainer}>
+                    <PluggyConnect
+                        key={`${connector.id}-${connectToken.substring(0, 10)}`}
+                        connectToken={connectToken}
+                        connectorIds={[connector.id]}
+                        onSuccess={handlePluggySuccess}
+                        products={products}
+                        onError={handlePluggyError}
+                        onClose={handlePluggyClose}
+                        language="pt-BR"
+                        theme={themeMode === 'light' ? 'light' : 'dark'}
+                        includeSandbox={false}
+                        oauthRedirectUri={callbackUrl}
+                    />
+                </View>
+            ) : (
+                <ScrollView
+                    style={styled.scrollView}
+                    contentContainerStyle={styled.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Institution Info */}
+                    <View style={styled.institutionCard}>
+                        <View style={styled.logoContainer}>{renderLogo()}</View>
+                        <Text style={styled.institutionName}>{connector.name}</Text>
+                        <Text style={styled.institutionType}>
+                            {formatInstitutionType(connector.type)}
+                        </Text>
+                    </View>
+
+                    {/* Content */}
+                    {renderContent()}
+                </ScrollView>
+            )}
+        </ScreenWithHeader>
     );
 };

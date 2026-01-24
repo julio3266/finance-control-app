@@ -46,10 +46,6 @@ export const fetchUserProfile = createAsyncThunk<
     } catch (error) {
         const apiError = error as ApiError;
         const errorMessage = apiError.message || 'Erro ao buscar perfil do usuário';
-        if (__DEV__) {
-            // eslint-disable-next-line no-console
-            console.error('Fetch User Profile Error:', errorMessage, error);
-        }
         return rejectWithValue(errorMessage);
     }
 });

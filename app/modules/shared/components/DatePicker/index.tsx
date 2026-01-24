@@ -1,12 +1,35 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Modalize } from 'react-native-modalize';
 import { IHandles } from 'react-native-modalize/lib/options';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { styles } from './styles';
+
+LocaleConfig.locales['pt'] = {
+    monthNames: [
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro',
+    ],
+    monthNamesShort: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+    dayNames: ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'],
+    dayNamesShort: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+    today: 'Hoje',
+};
+LocaleConfig.defaultLocale = 'pt';
 
 interface DatePickerProps {
     modalizeRef: React.RefObject<IHandles>;
@@ -14,23 +37,6 @@ interface DatePickerProps {
     onSelect: (date: Date) => void;
     accentColor?: string;
 }
-
-const DAYS_OF_WEEK = ['Do', '2ª', '3ª', '4ª', '5ª', '6ª', 'Sá'];
-const MONTHS = [
-    'janeiro',
-    'fevereiro',
-    'março',
-    'abril',
-    'maio',
-    'junho',
-    'julho',
-    'agosto',
-    'setembro',
-    'outubro',
-    'novembro',
-    'dezembro',
-];
-const WEEKDAYS = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
 export const DatePicker: React.FC<DatePickerProps> = ({
     modalizeRef,
@@ -43,143 +49,78 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     const styled = styles(theme, accentColor);
 
     const initialDate = selectedDate || new Date();
-    const [currentDate, setCurrentDate] = useState<Date>(initialDate);
-    const [showYearPicker, setShowYearPicker] = useState(false);
-    const [tempSelectedDate, setTempSelectedDate] = useState<Date>(initialDate);
+    const [tempSelectedDate, setTempSelectedDate] = useState<string>(
+        initialDate.toISOString().split('T')[0],
+    );
+    const [currentMonth, setCurrentMonth] = useState<string>(
+        initialDate.toISOString().split('T')[0],
+    );
 
     useEffect(() => {
         if (selectedDate) {
-            setCurrentDate(selectedDate);
-            setTempSelectedDate(selectedDate);
+            const dateString = selectedDate.toISOString().split('T')[0];
+            setTempSelectedDate(dateString);
+            setCurrentMonth(dateString);
         }
     }, [selectedDate]);
 
-    const currentYear = currentDate.getFullYear();
-    const currentMonth = currentDate.getMonth();
+    const markedDates = useMemo(() => {
+        return {
+            [tempSelectedDate]: {
+                selected: true,
+                selectedColor: accentColor,
+            },
+        };
+    }, [tempSelectedDate, accentColor]);
 
-    const yearOptions = useMemo(() => {
-        const years = [];
-        const startYear = currentYear - 10;
-        const endYear = currentYear + 10;
-        for (let year = startYear; year <= endYear; year++) {
-            years.push(year);
-        }
-        return years;
-    }, [currentYear]);
-
-    const calendarDays = useMemo(() => {
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-        const daysInMonth = lastDayOfMonth.getDate();
-        const startingDayOfWeek = firstDayOfMonth.getDay();
-
-        const days: (number | null)[] = [];
-
-        const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
-        for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-            days.push(prevMonthLastDay - i);
-        }
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            days.push(day);
-        }
-
-        const totalDaysAdded = startingDayOfWeek + daysInMonth;
-        const remainingDays = 42 - totalDaysAdded; // 42 = 6 semanas × 7 dias
-        for (let day = 1; day <= remainingDays; day++) {
-            days.push(day);
-        }
-
-        return days;
-    }, [currentYear, currentMonth]);
-
-    const isCurrentMonth = (day: number | null, index: number) => {
-        if (day === null) return false;
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        const startingDayOfWeek = firstDayOfMonth.getDay();
-        return index >= startingDayOfWeek;
-    };
-
-    const isSelectedDate = (day: number | null) => {
-        if (!tempSelectedDate || day === null) return false;
-        return (
-            day === tempSelectedDate.getDate() &&
-            currentMonth === tempSelectedDate.getMonth() &&
-            currentYear === tempSelectedDate.getFullYear()
-        );
-    };
-
-    const handlePrevMonth = () => {
-        setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
-    };
-
-    const handleNextMonth = () => {
-        setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
-    };
-
-    const handleDaySelect = (day: number | null) => {
-        if (day === null) return;
-        const newDate = new Date(currentYear, currentMonth, day);
-        setTempSelectedDate(newDate);
-    };
-
-    const handleYearSelect = (year: number) => {
-        setCurrentDate(new Date(year, currentMonth, 1));
-        setShowYearPicker(false);
+    const handleDayPress = (day: { dateString: string }) => {
+        setTempSelectedDate(day.dateString);
     };
 
     const handleConfirm = () => {
-        onSelect(tempSelectedDate);
+        const [year, month, day] = tempSelectedDate.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        onSelect(date);
         modalizeRef.current?.close();
     };
 
     const handleCancel = () => {
-        setTempSelectedDate(selectedDate || new Date());
+        if (selectedDate) {
+            setTempSelectedDate(selectedDate.toISOString().split('T')[0]);
+        }
         modalizeRef.current?.close();
     };
 
-    const formatSelectedDate = (date: Date) => {
-        const weekday = WEEKDAYS[date.getDay()];
-        const month = MONTHS[date.getMonth()];
-        const day = date.getDate();
-        return `${weekday}, ${month} ${day}`;
-    };
-
-    const isPrevMonthDay = (day: number | null, index: number) => {
-        if (day === null) return false;
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        const startingDayOfWeek = firstDayOfMonth.getDay();
-        return index < startingDayOfWeek;
-    };
-
-    const isNextMonthDay = (day: number | null, index: number) => {
-        if (day === null) return false;
-        const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
-        const daysInMonth = lastDayOfMonth.getDate();
-        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        const startingDayOfWeek = firstDayOfMonth.getDay();
-        const totalDays = startingDayOfWeek + daysInMonth;
-        return index >= totalDays;
+    const formatSelectedDate = (dateString: string) => {
+        const [yearNum, monthNum, dayNum] = dateString.split('-').map(Number);
+        const date = new Date(yearNum, monthNum - 1, dayNum);
+        const weekdays = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+        const months = [
+            'janeiro',
+            'fevereiro',
+            'março',
+            'abril',
+            'maio',
+            'junho',
+            'julho',
+            'agosto',
+            'setembro',
+            'outubro',
+            'novembro',
+            'dezembro',
+        ];
+        const weekday = weekdays[date.getDay()];
+        const monthName = months[date.getMonth()];
+        return `${weekday}, ${monthName} ${dayNum}`;
     };
 
     return (
         <Modalize
             ref={modalizeRef}
-            modalHeight={600}
+            adjustToContentHeight
             handlePosition="inside"
             HeaderComponent={
                 <View style={[styled.header, { paddingTop: insets.top + 20 }]}>
-                    <TouchableOpacity
-                        onPress={() => setShowYearPicker(!showYearPicker)}
-                        style={styled.yearSelector}
-                    >
-                        <Text style={styled.yearText}>{currentYear}</Text>
-                        <Feather
-                            name={showYearPicker ? 'chevron-up' : 'chevron-down'}
-                            size={16}
-                            color={accentColor}
-                        />
-                    </TouchableOpacity>
                     <Text style={styled.selectedDateText}>
                         {formatSelectedDate(tempSelectedDate)}
                     </Text>
@@ -187,91 +128,39 @@ export const DatePicker: React.FC<DatePickerProps> = ({
             }
         >
             <View style={styled.container}>
-                {showYearPicker ? (
-                    <ScrollView style={styled.yearList} showsVerticalScrollIndicator>
-                        {yearOptions.map((year) => (
-                            <TouchableOpacity
-                                key={year}
-                                style={[
-                                    styled.yearOption,
-                                    year === currentYear && styled.yearOptionSelected,
-                                ]}
-                                onPress={() => handleYearSelect(year)}
-                            >
-                                <Text
-                                    style={[
-                                        styled.yearOptionText,
-                                        year === currentYear && styled.yearOptionTextSelected,
-                                    ]}
-                                >
-                                    {year}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                ) : (
-                    <>
-                        {/* Month Navigation */}
-                        <View style={styled.monthNavigation}>
-                            <TouchableOpacity
-                                onPress={handlePrevMonth}
-                                style={styled.monthNavButton}
-                            >
-                                <Feather name="chevron-left" size={20} color={theme.foreground} />
-                            </TouchableOpacity>
-                            <Text style={styled.monthText}>
-                                {MONTHS[currentMonth]} {currentYear}
-                            </Text>
-                            <TouchableOpacity
-                                onPress={handleNextMonth}
-                                style={styled.monthNavButton}
-                            >
-                                <Feather name="chevron-right" size={20} color={theme.foreground} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Days of Week */}
-                        <View style={styled.daysOfWeek}>
-                            {DAYS_OF_WEEK.map((day) => (
-                                <Text key={day} style={styled.dayOfWeekText}>
-                                    {day}
-                                </Text>
-                            ))}
-                        </View>
-
-                        {/* Calendar Grid */}
-                        <View style={styled.calendarGrid}>
-                            {calendarDays.map((day, index) => {
-                                const isPrev = isPrevMonthDay(day, index);
-                                const isNext = isNextMonthDay(day, index);
-                                const isCurrent = isCurrentMonth(day, index);
-                                const isSelected = isSelectedDate(day);
-
-                                return (
-                                    <TouchableOpacity
-                                        key={`${day}-${index}`}
-                                        style={[
-                                            styled.calendarDay,
-                                            isSelected && styled.calendarDaySelected,
-                                        ]}
-                                        onPress={() => handleDaySelect(day)}
-                                        disabled={!isCurrent}
-                                    >
-                                        <Text
-                                            style={[
-                                                styled.calendarDayText,
-                                                (isPrev || isNext) && styled.calendarDayTextMuted,
-                                                isSelected && styled.calendarDayTextSelected,
-                                            ]}
-                                        >
-                                            {day}
-                                        </Text>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-                    </>
-                )}
+                <Calendar
+                    current={currentMonth}
+                    minDate={new Date(2020, 0, 1).toISOString().split('T')[0]}
+                    maxDate={new Date(2030, 11, 31).toISOString().split('T')[0]}
+                    markedDates={markedDates}
+                    onDayPress={handleDayPress}
+                    onMonthChange={(month: { month: number; year: number }) => {
+                        const date = new Date(month.year, month.month - 1, 1);
+                        setCurrentMonth(date.toISOString().split('T')[0]);
+                    }}
+                    enableSwipeMonths
+                    theme={{
+                        backgroundColor: theme.background,
+                        calendarBackground: theme.background,
+                        textSectionTitleColor: theme.foregroundMuted,
+                        selectedDayBackgroundColor: accentColor,
+                        selectedDayTextColor: '#ffffff',
+                        todayTextColor: accentColor,
+                        dayTextColor: theme.foreground,
+                        textDisabledColor: theme.foregroundMuted,
+                        dotColor: accentColor,
+                        selectedDotColor: '#ffffff',
+                        arrowColor: accentColor,
+                        monthTextColor: theme.foreground,
+                        textDayFontWeight: '500',
+                        textMonthFontWeight: '600',
+                        textDayHeaderFontWeight: '600',
+                        textDayFontSize: 14,
+                        textMonthFontSize: 16,
+                        textDayHeaderFontSize: 12,
+                    }}
+                    style={styled.calendar}
+                />
 
                 {/* Action Buttons */}
                 <View style={styled.actions}>

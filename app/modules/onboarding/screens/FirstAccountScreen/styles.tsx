@@ -93,35 +93,32 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
         required: {
             color: colors.error[500],
         },
-        typesGrid: {
+        selectButton: {
             flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 12,
-        },
-        typeCard: {
-            width: '31%',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             backgroundColor: theme.cardBg,
             borderRadius: 12,
             padding: 16,
-            alignItems: 'center',
             borderWidth: 1,
             borderColor: theme.cardBorder,
         },
-        typeCardActive: {
-            borderColor: colors.primary[500],
-            borderWidth: 2,
+        selectContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
         },
-        typeIcon: {
-            marginBottom: 8,
+        selectIcon: {
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            backgroundColor: theme.backgroundTertiary,
+            alignItems: 'center',
+            justifyContent: 'center',
         },
-        typeLabel: {
-            fontSize: 12,
-            color: theme.foregroundMuted,
-            textAlign: 'center',
-        },
-        typeLabelActive: {
-            color: colors.primary[500],
-            fontWeight: '500',
+        selectText: {
+            fontSize: 16,
+            color: theme.foreground,
         },
         colorsRow: {
             flexDirection: 'row',
@@ -169,5 +166,74 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             fontSize: 16,
             fontWeight: '600',
             color: '#ffffff',
+        },
+        // BottomSheet Styles
+        bottomSheet: {
+            backgroundColor: theme.backgroundSecondary,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+        },
+        bottomSheetHandle: {
+            backgroundColor: theme.border,
+            width: 40,
+        },
+        bottomSheetOverlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+        bottomSheetContent: {
+            padding: 20,
+        },
+        bottomSheetHeader: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
+        },
+        bottomSheetTitle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: theme.foreground,
+        },
+        typesList: {
+            gap: 8,
+        },
+        typeOption: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: theme.cardBg,
+            borderRadius: 12,
+            padding: 16,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+        },
+        typeOptionActive: {
+            borderColor: colors.primary[500],
+            borderWidth: 2,
+            backgroundColor: colors.primary[500] + '10',
+        },
+        typeOptionLeft: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+        },
+        typeOptionIcon: {
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            backgroundColor: theme.backgroundTertiary,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        typeOptionIconActive: {
+            backgroundColor: colors.primary[500] + '20',
+        },
+        typeOptionLabel: {
+            fontSize: 16,
+            color: theme.foreground,
+        },
+        typeOptionLabelActive: {
+            color: colors.primary[500],
+            fontWeight: '600',
         },
     });

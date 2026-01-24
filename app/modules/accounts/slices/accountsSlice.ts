@@ -1,15 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchAccounts, AccountResponse } from './accountsApi';
+import { fetchAccounts, fetchUnifiedAccounts, AccountResponse, UnifiedAccountResponse } from './accountsApi';
 
 interface AccountsState {
     accounts: AccountResponse[];
+    unifiedAccounts: UnifiedAccountResponse[];
     loading: boolean;
+    loadingUnified: boolean;
     error: string | null;
 }
 
 const initialState: AccountsState = {
     accounts: [],
+    unifiedAccounts: [],
     loading: false,
+    loadingUnified: false,
     error: null,
 };
 
@@ -35,6 +39,18 @@ const accountsSlice = createSlice({
             .addCase(fetchAccounts.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Erro ao buscar contas';
+            })
+            .addCase(fetchUnifiedAccounts.pending, (state) => {
+                state.loadingUnified = true;
+                state.error = null;
+            })
+            .addCase(fetchUnifiedAccounts.fulfilled, (state, action) => {
+                state.loadingUnified = false;
+                state.unifiedAccounts = action.payload;
+            })
+            .addCase(fetchUnifiedAccounts.rejected, (state, action) => {
+                state.loadingUnified = false;
+                state.error = action.payload || 'Erro ao buscar contas unificadas';
             });
     },
 });

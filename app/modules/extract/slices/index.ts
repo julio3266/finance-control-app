@@ -6,6 +6,7 @@ export type {
     UnifiedTransactionAccount,
     UnifiedTransactionCategory,
     UnifiedTransactionCreditCard,
+    PaginationInfo,
 } from './extractApi';
 export { setFilters, clearFilters, resetExtract } from './extractSlice';
 export { default as extractReducer } from './extractSlice';

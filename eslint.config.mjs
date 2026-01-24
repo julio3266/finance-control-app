@@ -23,6 +23,7 @@ export default [
             indent: 'off',
             'no-console': 'error',
             'arrow-body-style': ['error', 'as-needed'],
+            'prettier/prettier': 'off',
             'node/handle-callback-err': 'off',
             'node/no-callback-literal': 'off',
             'node/no-exports-assign': 'off',

@@ -260,4 +260,7 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             fontWeight: '600',
             color: '#ffffff',
         },
+        widgetContainer: {
+            flex: 1,
+        },
     });

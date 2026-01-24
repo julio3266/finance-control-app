@@ -8,18 +8,18 @@ import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import Feather from '@expo/vector-icons/Feather';
 import Entypo from '@expo/vector-icons/Entypo';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { useAppSelector, useAppDispatch } from '@app/store';
 import { styles } from './styles';
 import { FabMenu } from '../FabMenu';
 import { useDrawer } from '@app/navigation/DrawerNavigation/DrawerContext';
 import type { MainStackParamList } from '@app/navigation/DrawerNavigation';
 import { CreditCardCreationModal } from '@app/modules/credit-card/components/CreditCardCreationModal';
+import { TransactionCreationModal, type TransactionModalType } from '@app/modules/shared/components';
 import { fetchUserProfile } from '@app/modules/profile/slices';
 
 type MainStackNavigationProp = NativeStackNavigationProp<MainStackParamList>;
 
-interface BottomNavigationBarProps extends BottomTabBarProps {}
+interface BottomNavigationBarProps extends BottomTabBarProps { }
 
 export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state, navigation }) => {
     const theme = useTheme();
@@ -28,6 +28,9 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
     const fabRotation = useRef(new Animated.Value(0)).current;
     const creditCardModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
+    const incomeModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
+    const expenseModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
+    const investmentModalRef = useRef<IHandles>(null) as React.RefObject<IHandles>;
     const { isOpen: isDrawerOpen, closeDrawer } = useDrawer();
     const parentNavigation = useNavigation<MainStackNavigationProp>();
     const profile = useAppSelector((state) => state.profile.profile);
@@ -47,11 +50,11 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
 
         try {
             const currentTabRoute = state.routes[state.index];
-            if (currentTabRoute?.name === 'Investiments') {
-                const investState = (currentTabRoute as any)?.state;
-                if (investState) {
-                    const investRoute = investState.routes?.[investState.index];
-                    if (investRoute?.name === 'NewInvestment') {
+            if (currentTabRoute?.name === 'Budget') {
+                const budgetState = (currentTabRoute as any)?.state;
+                if (budgetState) {
+                    const budgetRoute = budgetState.routes?.[budgetState.index];
+                    if (budgetRoute?.name === 'CreateBudget' || budgetRoute?.name === 'EditBudget') {
                         return true;
                     }
                 }
@@ -62,7 +65,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
 
             const parentRoute = parentNavState.routes[parentNavState.index];
 
-            if (parentRoute?.name === 'NewInvestment') {
+            if (parentRoute?.name === 'CreateBudget' || parentRoute?.name === 'EditBudget') {
                 return true;
             }
 
@@ -71,7 +74,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
                 if (nestedState) {
                     const nestedRoute = nestedState.routes?.[nestedState.index];
                     const routeName = nestedRoute?.name;
-                    if (routeName === 'NewTransaction' || routeName === 'NewInvestment') {
+                    if (routeName === 'NewTransaction' || routeName === 'CreateBudget' || routeName === 'EditBudget') {
                         return true;
                     }
                 }
@@ -100,15 +103,37 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     };
 
     const handleIncomePress = () => {
-        parentNavigation.navigate('Incomes', { screen: 'NewTransaction' } as any);
+        incomeModalRef.current?.open();
     };
 
     const handleExpensePress = () => {
-        parentNavigation.navigate('Expenses', { screen: 'NewTransaction' } as any);
+        expenseModalRef.current?.open();
     };
 
     const handleInvestmentPress = () => {
+        investmentModalRef.current?.open();
+    };
+
+    const handleManualIncome = () => {
+        parentNavigation.navigate('Incomes', { screen: 'NewTransaction' } as any);
+    };
+
+    const handleManualExpense = () => {
+        parentNavigation.navigate('Expenses', { screen: 'NewTransaction' } as any);
+    };
+
+    const handleManualInvestment = () => {
         parentNavigation.navigate('NewInvestment', { screen: 'NewInvestment' } as any);
+    };
+
+    const handleOpenFinanceTransaction = () => {
+        if (!isPremium) {
+            parentNavigation.navigate('Subscription', { screen: 'Subscription' } as any);
+            return;
+        }
+        parentNavigation.navigate('OpenFinance', {
+            screen: 'ConnectAccounts',
+        } as any);
     };
 
     const handleCreditCardPress = () => {
@@ -120,11 +145,7 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
     };
 
     const handleOpenFinanceCreditCard = () => {
-        if (profileLoading) {
-            return;
-        }
-
-        if (!profile || !isPremium) {
+        if (!isPremium) {
             parentNavigation.navigate('Subscription', { screen: 'Subscription' } as any);
             return;
         }
@@ -154,13 +175,13 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
             iconComponent: Entypo,
             iconName: 'list',
         },
-        Investiments: {
-            label: 'Investimentos',
-            iconComponent: FontAwesome5,
-            iconName: 'chart-bar',
+        Budget: {
+            label: 'Orçamento',
+            iconComponent: Feather,
+            iconName: 'pie-chart',
         },
-        More: {
-            label: 'Metas',
+        Reports: {
+            label: 'Relatórios',
             iconComponent: Entypo,
             iconName: 'bar-graph',
         },
@@ -262,6 +283,30 @@ export const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ state,
                 isPremium={isPremium}
                 onManualPress={handleManualCreditCard}
                 onOpenFinancePress={handleOpenFinanceCreditCard}
+            />
+
+            <TransactionCreationModal
+                modalizeRef={incomeModalRef}
+                type="income"
+                isPremium={isPremium}
+                onManualPress={handleManualIncome}
+                onOpenFinancePress={handleOpenFinanceTransaction}
+            />
+
+            <TransactionCreationModal
+                modalizeRef={expenseModalRef}
+                type="expense"
+                isPremium={isPremium}
+                onManualPress={handleManualExpense}
+                onOpenFinancePress={handleOpenFinanceTransaction}
+            />
+
+            <TransactionCreationModal
+                modalizeRef={investmentModalRef}
+                type="investment"
+                isPremium={isPremium}
+                onManualPress={handleManualInvestment}
+                onOpenFinancePress={handleOpenFinanceTransaction}
             />
         </>
     );

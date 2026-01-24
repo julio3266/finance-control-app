@@ -8,10 +8,19 @@ export interface ApiError {
 class ApiClient {
     private baseURL: string;
     private timeout: number;
+    private token: string | null = null;
 
     constructor() {
         this.baseURL = config.apiUrl;
         this.timeout = config.apiTimeout;
+    }
+
+    setToken(token: string | null) {
+        this.token = token;
+    }
+
+    getToken(): string | null {
+        return this.token;
     }
 
     private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -20,11 +29,16 @@ class ApiClient {
         const url = `${baseUrl}${endpointPath}`;
 
         const method = options.method || 'GET';
-        const headers = {
+        const headers: Record<string, string> = {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            ...options.headers,
+            ...(options.headers as Record<string, string>),
         };
+
+        // Add Authorization header if token exists
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
 
         const startTime = Date.now();
         const controller = new AbortController();

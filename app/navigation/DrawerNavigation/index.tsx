@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated, TouchableOpacity, Dimensions } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { useTheme } from '@app/utils/useTheme';
 import { HomeRoutes } from '@app/modules/Home/routes';
 import { ExpensesRoutes, ExpensesStackParamList } from '@app/modules/expenses';
@@ -9,6 +10,10 @@ import { NewInvestmentRoutes, NewInvestmentStackParamList } from '@app/modules/i
 import { CreditCardRoutes, CreditCardStackParamList } from '@app/modules/credit-card';
 import { OpenFinanceRoutes, OpenFinanceStackParamList } from '@app/modules/open-finance/routes';
 import { SubscriptionRoutes, SubscriptionStackParamList } from '@app/modules/subscription';
+import { FilterRoutes, FilterStackParamList } from '@app/modules/extract';
+import { GoalsRoutes, GoalsStackParamList } from '@app/modules/goals/routes';
+import { AccountsRoutes, AccountsStackParamList } from '@app/modules/accounts';
+import { ReportsRoutes } from '@app/modules/reports';
 import ProfileScreen from '@app/modules/profile/screens/ProfileScreen';
 import { DrawerProvider, useDrawer } from './DrawerContext';
 
@@ -20,6 +25,10 @@ export type MainStackParamList = {
     CreditCard: CreditCardStackParamList;
     OpenFinance: OpenFinanceStackParamList;
     Subscription: SubscriptionStackParamList;
+    Filter: NavigatorScreenParams<FilterStackParamList>;
+    Goals: NavigatorScreenParams<GoalsStackParamList>;
+    Accounts: NavigatorScreenParams<AccountsStackParamList>;
+    Reports: undefined;
 };
 
 const MainStack = createNativeStackNavigator<MainStackParamList>();
@@ -117,6 +126,10 @@ export const DrawerNavigator: React.FC = () => (
                 <MainStack.Screen name="CreditCard" component={CreditCardRoutes} />
                 <MainStack.Screen name="OpenFinance" component={OpenFinanceRoutes} />
                 <MainStack.Screen name="Subscription" component={SubscriptionRoutes} />
+                <MainStack.Screen name="Filter" component={FilterRoutes} />
+                <MainStack.Screen name="Goals" component={GoalsRoutes} />
+                <MainStack.Screen name="Accounts" component={AccountsRoutes} />
+                <MainStack.Screen name="Reports" component={ReportsRoutes} />
             </MainStack.Navigator>
             <DrawerContent />
         </View>

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Image } fr
 import { Modalize } from 'react-native-modalize';
 import { IHandles } from 'react-native-modalize/lib/options';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
@@ -63,7 +63,7 @@ export const CardBrandPickerModal: React.FC<CardBrandPickerModalProps> = ({
         if (isSvg) {
             return (
                 <View style={styled.brandIconImageContainer}>
-                    <SvgUri
+                    <SvgCssUri
                         uri={uri}
                         width={40}
                         height={40}

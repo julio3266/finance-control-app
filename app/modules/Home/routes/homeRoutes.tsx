@@ -3,15 +3,15 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { DashboardRoutes } from '@app/modules/dashboard';
 import { ExtractRoutes } from '@app/modules/extract';
-import { InvestimentsRoutes, InvestimentsStackParamList } from '@app/modules/investiments';
-import { MoreRoutes } from '@app/modules/more';
+import { BudgetRoutes, BudgetStackParamList } from '@app/modules/budget';
+import { ReportsRoutes } from '@app/modules/reports';
 import { BottomNavigationBar } from '../components';
 
 export type HomeTabParamList = {
     Dashboard: undefined;
     Extract: undefined;
-    Investiments: NavigatorScreenParams<InvestimentsStackParamList>;
-    More: undefined;
+    Budget: NavigatorScreenParams<BudgetStackParamList>;
+    Reports: undefined;
 };
 
 const Tab = createBottomTabNavigator<HomeTabParamList>();
@@ -38,17 +38,17 @@ export const HomeRoutes: React.FC = () => (
             }}
         />
         <Tab.Screen
-            name="Investiments"
-            component={InvestimentsRoutes}
+            name="Budget"
+            component={BudgetRoutes}
             options={{
-                tabBarLabel: 'Investimentos',
+                tabBarLabel: 'Orçamento',
             }}
         />
         <Tab.Screen
-            name="More"
-            component={MoreRoutes}
+            name="Reports"
+            component={ReportsRoutes}
             options={{
-                tabBarLabel: 'Mais',
+                tabBarLabel: 'Relatórios',
             }}
         />
     </Tab.Navigator>

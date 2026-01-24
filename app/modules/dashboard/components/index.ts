@@ -5,6 +5,7 @@ export { QuickActionButton } from './QuickActionButton';
 export { TransactionItem } from './TransactionItem';
 export { ConnectionItem } from './ConnectionItem';
 export { AccountItem, type UnifiedAccount } from './AccountItem';
+export { AccountsCard } from './AccountsCard';
 export { SimpleHeader } from './SimpleHeader';
 export { BalanceCard } from './BalanceCard';
 export { HomeHeader } from './HomeHeader';

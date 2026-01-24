@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { formatCurrency } from '@app/utils/formatCurrency';
@@ -65,7 +65,7 @@ export const CreditCardItem: React.FC<CreditCardItemProps> = ({
         if (brandIconUrl && !logoError) {
             if (isSvg) {
                 return (
-                    <SvgUri
+                    <SvgCssUri
                         uri={brandIconUrl}
                         width={50}
                         height={50}

@@ -189,13 +189,11 @@ export const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({ type
             const transactionDate = getTransactionDate();
             const amountNum = parseAmountToNumber(amount);
 
-            // Validação: deve ter accountId OU creditCardId (não ambos, não nenhum)
             const accountId = selectedAccount?.type === 'account' ? selectedAccount?.id : null;
             const creditCardId =
                 selectedAccount?.type === 'creditCard' ? selectedAccount?.id : null;
 
             if (!accountId && !creditCardId) {
-                // Erro será tratado pelo middleware
                 throw new Error('Selecione uma conta ou cartão de crédito');
             }
 
@@ -366,14 +364,14 @@ export const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({ type
                                         style={[
                                             styled.dateButtonText,
                                             selectedDate === option.key &&
-                                                styled.dateButtonTextActive,
+                                            styled.dateButtonTextActive,
                                         ]}
                                     >
                                         {option.key === 'other' && customDate
                                             ? customDate.toLocaleDateString('pt-BR', {
-                                                  day: '2-digit',
-                                                  month: '2-digit',
-                                              })
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                            })
                                             : option.label}
                                     </Text>
                                 </TouchableOpacity>
@@ -557,10 +555,10 @@ export const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({ type
                                             {repeatPeriod === 'dias'
                                                 ? 'Diário'
                                                 : repeatPeriod === 'semanas'
-                                                  ? 'Semanal'
-                                                  : repeatPeriod === 'meses'
-                                                    ? 'Mensal'
-                                                    : 'Anual'}
+                                                    ? 'Semanal'
+                                                    : repeatPeriod === 'meses'
+                                                        ? 'Mensal'
+                                                        : 'Anual'}
                                         </Text>
                                         <Feather
                                             name="chevron-down"

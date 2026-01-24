@@ -21,6 +21,9 @@ import creditCardReducer from '../modules/credit-card/slices/creditCardSlice';
 import { profileReducer } from '../modules/profile/slices';
 import { openFinanceReducer } from '../modules/open-finance/slices';
 import extractReducerDefault from '../modules/extract/slices/extractSlice';
+import { goalsReducer } from '../modules/goals/slices';
+import { subscriptionReducer } from '../modules/subscription/slices';
+import { reportsReducer } from '../modules/reports/slices';
 import { errorMiddleware } from './middleware';
 
 type AuthStateType = ReturnType<typeof authReducer>;
@@ -32,6 +35,9 @@ type CreditCardStateType = ReturnType<typeof creditCardReducer>;
 type ProfileStateType = ReturnType<typeof profileReducer>;
 type OpenFinanceStateType = ReturnType<typeof openFinanceReducer>;
 type ExtractStateType = ReturnType<typeof extractReducerDefault>;
+type GoalsStateType = ReturnType<typeof goalsReducer>;
+type SubscriptionStateType = ReturnType<typeof subscriptionReducer>;
+type ReportsStateType = ReturnType<typeof reportsReducer>;
 
 const authPersistConfig = {
     key: 'auth',
@@ -54,8 +60,12 @@ const themePersistConfig = {
     whitelist: ['mode'],
 };
 
+// Não persistir os filtros - eles serão armazenados apenas no estado do Redux
+// Isso evita problemas de sincronização e garante que os filtros sejam sempre atualizados corretamente
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedThemeReducer = persistReducer(themePersistConfig, themeReducer);
+// Usar o reducer sem persistência para extract
+const extractReducer = extractReducerDefault;
 
 export const store = configureStore({
     reducer: {
@@ -67,7 +77,10 @@ export const store = configureStore({
         creditCard: creditCardReducer,
         profile: profileReducer,
         openFinance: openFinanceReducer,
-        extract: extractReducerDefault,
+        extract: extractReducer,
+        goals: goalsReducer,
+        subscription: subscriptionReducer,
+        reports: reportsReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -91,6 +104,9 @@ export interface TypedRootState {
     profile: ProfileStateType;
     openFinance: OpenFinanceStateType;
     extract: ExtractStateType;
+    goals: GoalsStateType;
+    subscription: SubscriptionStateType;
+    reports: ReportsStateType;
 }
 
 export type RootStateTyped = RootState & TypedRootState;

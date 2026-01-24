@@ -46,6 +46,10 @@ export const loginUser = createAsyncThunk(
                 email,
                 otp,
             });
+
+            // Set token in API client for authenticated requests
+            apiClient.setToken(response.token);
+
             dispatch(setOtp(otp));
             dispatch(setEmail(email));
             return {
@@ -86,18 +90,9 @@ export interface UserInfoResponse {
 
 export const fetchUserProfile = createAsyncThunk(
     'auth/fetchUserProfile',
-    async (_, { getState, rejectWithValue }) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const state = getState() as { auth: { token: string | null } };
-            const token = state.auth.token;
-
-            if (!token) {
-                return rejectWithValue('Token não encontrado');
-            }
-
-            const response = await apiClient.get<UserInfoResponse>('/api/auth/profile', {
-                Authorization: `Bearer ${token}`,
-            });
+            const response = await apiClient.get<UserInfoResponse>('/api/auth/profile');
             return response;
         } catch (error) {
             const apiError = error as ApiError;

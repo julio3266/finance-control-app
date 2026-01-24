@@ -118,19 +118,19 @@ const styles = () =>
         footerItem: {
             flexDirection: 'row',
             alignItems: 'flex-start',
-            gap: 12,
+            gap: 8,
             flex: 1,
         },
         footerItemFirst: {
-            marginRight: 24,
+            marginRight: 16,
         },
         footerItemLast: {
             marginRight: 0,
         },
         iconCircle: {
-            width: 32,
-            height: 32,
-            borderRadius: 16,
+            width: 28,
+            height: 28,
+            borderRadius: 14,
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
@@ -140,12 +140,12 @@ const styles = () =>
             minWidth: 0,
         },
         footerLabel: {
-            fontSize: 12,
+            fontSize: 11,
             color: 'rgba(255,255,255,0.8)',
-            marginBottom: 4,
+            marginBottom: 2,
         },
         footerValue: {
-            fontSize: 16,
+            fontSize: 13,
             fontWeight: '600',
             color: '#ffffff',
         },

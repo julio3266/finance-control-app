@@ -3,6 +3,7 @@
         "name": "finance-control-app",
         "slug": "finance-control-app",
         "version": "1.0.0",
+        "scheme": "financecontrol",
         "extra": {
             "API_URL": "https://www.api-qa.financecontrolapp.com.br",
             "API_TIMEOUT": "30000",
@@ -10,10 +11,23 @@
         },
         "plugins": ["expo-router"],
         "android": {
-            "package": "com.anonymous.financecontrolapp"
+            "package": "com.anonymous.financecontrolapp",
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "financecontrol"
+                        }
+                    ],
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         },
         "ios": {
-            "bundleIdentifier": "com.anonymous.financecontrolapp"
+            "bundleIdentifier": "com.anonymous.financecontrolapp",
+            "associatedDomains": ["applinks:financecontrolapp.com.br"]
         }
     }
 }

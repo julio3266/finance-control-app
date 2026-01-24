@@ -28,12 +28,16 @@ export const CreditCardCreationModal: React.FC<CreditCardCreationModalProps> = (
 
     const handleManualPress = () => {
         modalizeRef.current?.close();
-        onManualPress();
+        setTimeout(() => {
+            onManualPress();
+        }, 300);
     };
 
     const handleOpenFinancePress = () => {
         modalizeRef.current?.close();
-        onOpenFinancePress();
+        setTimeout(() => {
+            onOpenFinancePress();
+        }, 300);
     };
 
     return (

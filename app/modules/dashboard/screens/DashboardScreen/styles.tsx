@@ -1,3 +1,4 @@
+import { colors } from '@app/utils/colors';
 import { useTheme } from '@app/utils/useTheme';
 import { StyleSheet } from 'react-native';
 
@@ -43,5 +44,65 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             fontSize: 16,
             color: theme.foregroundMuted,
             textAlign: 'center',
+        },
+        addAccountButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 16,
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            backgroundColor: `${colors.primary[600]}15`,
+            borderRadius: 8,
+            gap: 8,
+        },
+        addAccountText: {
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.primary[600],
+        },
+        premiumCard: {
+            backgroundColor: theme.cardBg,
+            borderRadius: 12,
+            marginTop: 20,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: theme.cardBorder,
+            shadowColor: '#000',
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+        },
+        premiumCardContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            gap: 12,
+        },
+        premiumIconContainer: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: `${colors.primary[600]}15`,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        premiumTextContainer: {
+            flex: 1,
+            gap: 4,
+        },
+        premiumTitle: {
+            fontSize: 16,
+            fontWeight: '700',
+            color: theme.foreground,
+            marginBottom: 4,
+        },
+        premiumSubtitle: {
+            fontSize: 14,
+            color: theme.foregroundMuted,
+            lineHeight: 20,
         },
     });

@@ -4,9 +4,9 @@ export const styles = () =>
     StyleSheet.create({
         container: {
             marginBottom: 24,
+            marginHorizontal: -20,
         },
         scrollContent: {
-            paddingLeft: 0,
-            paddingRight: 0,
+            paddingHorizontal: 20,
         },
     });

@@ -13,7 +13,7 @@ import {
     Dimensions,
     Modal,
 } from 'react-native';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@app/utils/useTheme';
@@ -152,12 +152,14 @@ export const InstitutionPicker: React.FC<InstitutionPickerProps> = ({
 
         if (isSvg) {
             return (
-                <SvgUri
-                    uri={uri}
-                    width={32}
-                    height={32}
-                    onError={() => setLogoErrors((prev) => ({ ...prev, [id]: true }))}
-                />
+                <View style={styled.svgWrapper}>
+                    <SvgCssUri
+                        uri={uri}
+                        width={32}
+                        height={32}
+                        onError={() => setLogoErrors((prev) => ({ ...prev, [id]: true }))}
+                    />
+                </View>
             );
         }
 
@@ -189,12 +191,12 @@ export const InstitutionPicker: React.FC<InstitutionPickerProps> = ({
                         {item.type === 'digital_bank'
                             ? 'Banco Digital'
                             : item.type === 'traditional_bank'
-                              ? 'Banco Tradicional'
-                              : item.type === 'credit_union'
-                                ? 'Cooperativa'
-                                : item.type === 'brokerage'
-                                  ? 'Corretora'
-                                  : 'Instituição Financeira'}
+                                ? 'Banco Tradicional'
+                                : item.type === 'credit_union'
+                                    ? 'Cooperativa'
+                                    : item.type === 'brokerage'
+                                        ? 'Corretora'
+                                        : 'Instituição Financeira'}
                     </Text>
                 </View>
                 <Feather

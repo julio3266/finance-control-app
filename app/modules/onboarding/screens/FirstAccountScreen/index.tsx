@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
     View,
     Text,
@@ -7,6 +7,8 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from 'react-native';
+import { Modalize } from 'react-native-modalize';
+import { IHandles } from 'react-native-modalize/lib/options';
 import { useTheme } from '@app/utils/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@app/utils/colors';
@@ -17,6 +19,32 @@ import { TextInput } from '@app/ui/TextInput';
 import { InstitutionPicker } from '../../components';
 import { Institution } from '../../slices';
 import { styles } from './styles';
+
+// Função para formatar valor como moeda brasileira
+const formatCurrencyInput = (value: string): string => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, '');
+
+    if (!numbers) return '';
+
+    // Converte para número (centavos)
+    const cents = parseInt(numbers, 10);
+
+    // Converte para reais
+    const reais = cents / 100;
+
+    // Formata como moeda brasileira
+    return reais.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+    });
+};
+
+// Função para extrair o valor numérico (em centavos) de um valor formatado
+const parseCurrencyValue = (formattedValue: string): number => {
+    const numbers = formattedValue.replace(/\D/g, '');
+    return numbers ? parseInt(numbers, 10) : 0;
+};
 
 interface FirstAccountScreenProps {
     onFinish: (data: AccountData) => void;
@@ -101,10 +129,28 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
     const [initialBalance, setInitialBalance] = useState('');
     const [color, setColor] = useState(COLORS[0]);
 
+    const typeModalRef = useRef<IHandles>(null);
+
     const isValid = name.trim() && selectedInstitution !== null;
+
+    const selectedTypeData = ACCOUNT_TYPES.find((item) => item.type === type);
 
     const handleSelectInstitution = useCallback((inst: Institution) => {
         setSelectedInstitution(inst);
+    }, []);
+
+    const handleBalanceChange = useCallback((text: string) => {
+        const formatted = formatCurrencyInput(text);
+        setInitialBalance(formatted);
+    }, []);
+
+    const handleOpenTypePicker = useCallback(() => {
+        typeModalRef.current?.open();
+    }, []);
+
+    const handleSelectType = useCallback((selectedType: AccountType) => {
+        setType(selectedType);
+        typeModalRef.current?.close();
     }, []);
 
     const handleFinish = () => {
@@ -177,29 +223,23 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
 
                     <View style={styled.inputGroup}>
                         <Text style={styled.label}>Tipo de Conta</Text>
-                        <View style={styled.typesGrid}>
-                            {ACCOUNT_TYPES.map((item) => (
-                                <TouchableOpacity
-                                    key={item.type}
-                                    style={[
-                                        styled.typeCard,
-                                        type === item.type && styled.typeCardActive,
-                                    ]}
-                                    onPress={() => setType(item.type)}
-                                    activeOpacity={0.7}
-                                >
-                                    <View style={styled.typeIcon}>{item.icon}</View>
-                                    <Text
-                                        style={[
-                                            styled.typeLabel,
-                                            type === item.type && styled.typeLabelActive,
-                                        ]}
-                                    >
-                                        {item.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                        <TouchableOpacity
+                            style={styled.selectButton}
+                            onPress={handleOpenTypePicker}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styled.selectContent}>
+                                {selectedTypeData && (
+                                    <View style={styled.selectIcon}>
+                                        {selectedTypeData.icon}
+                                    </View>
+                                )}
+                                <Text style={styled.selectText}>
+                                    {selectedTypeData?.label || 'Selecione um tipo'}
+                                </Text>
+                            </View>
+                            <Feather name="chevron-right" size={20} color={theme.foregroundMuted} />
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styled.inputGroup}>
@@ -207,7 +247,7 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
                         <TextInput
                             placeholder="R$ 0,00"
                             value={initialBalance}
-                            onChangeText={setInitialBalance}
+                            onChangeText={handleBalanceChange}
                             keyboardType="numeric"
                         />
                     </View>
@@ -252,6 +292,60 @@ export const FirstAccountScreen: React.FC<FirstAccountScreenProps> = ({
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+
+            {/* Account Type BottomSheet */}
+            <Modalize
+                ref={typeModalRef}
+                adjustToContentHeight
+                modalStyle={styled.bottomSheet}
+                handleStyle={styled.bottomSheetHandle}
+                overlayStyle={styled.bottomSheetOverlay}
+                closeOnOverlayTap
+            >
+                <View style={[styled.bottomSheetContent, { paddingBottom: insets.bottom + 20 }]}>
+                    <View style={styled.bottomSheetHeader}>
+                        <Text style={styled.bottomSheetTitle}>Tipo de Conta</Text>
+                        <TouchableOpacity
+                            onPress={() => typeModalRef.current?.close()}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            <Feather name="x" size={24} color={theme.foreground} />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styled.typesList}>
+                        {ACCOUNT_TYPES.map((item) => (
+                            <TouchableOpacity
+                                key={item.type}
+                                style={[
+                                    styled.typeOption,
+                                    type === item.type && styled.typeOptionActive,
+                                ]}
+                                onPress={() => handleSelectType(item.type)}
+                                activeOpacity={0.7}
+                            >
+                                <View style={styled.typeOptionLeft}>
+                                    <View style={[
+                                        styled.typeOptionIcon,
+                                        type === item.type && styled.typeOptionIconActive,
+                                    ]}>
+                                        {item.icon}
+                                    </View>
+                                    <Text style={[
+                                        styled.typeOptionLabel,
+                                        type === item.type && styled.typeOptionLabelActive,
+                                    ]}>
+                                        {item.label}
+                                    </Text>
+                                </View>
+                                {type === item.type && (
+                                    <Feather name="check" size={20} color={colors.primary[500]} />
+                                )}
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+            </Modalize>
         </KeyboardAvoidingView>
     );
 };

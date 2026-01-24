@@ -4,7 +4,7 @@ import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import Feather from '@expo/vector-icons/Feather';
 import type { BankConnection } from '@app/modules/open-finance/slices/openFinanceApi';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 
 interface ConnectionItemProps {
     connection: BankConnection;
@@ -34,7 +34,7 @@ export const ConnectionItem: React.FC<ConnectionItemProps> = ({ connection, onPr
 
         return (
             <View style={styled.logoWrapper}>
-                <SvgUri uri={connection.connectorLogo} width={40} height={40} />
+                <SvgCssUri uri={connection.connectorLogo} width={40} height={40} />
             </View>
         );
     };

@@ -132,6 +132,15 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             width: 32,
             height: 32,
         },
+        svgWrapper: {
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            backgroundColor: '#ffffff',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 4,
+        },
         logoPlaceholder: {
             width: 48,
             height: 48,

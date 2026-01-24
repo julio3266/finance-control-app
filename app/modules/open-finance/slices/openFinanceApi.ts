@@ -19,6 +19,8 @@ export interface Connector {
     primaryColor: string;
     type: string;
     country: string;
+    products: string[];
+    supportsCreditCards: boolean;
     credentials: ConnectorCredential[];
 }
 
@@ -33,14 +35,10 @@ export interface PaginationInfo {
 
 export interface ConnectorsResponse {
     connectors: Connector[];
-    pagination: PaginationInfo;
 }
 
 export interface FetchConnectorsParams {
     search?: string;
-    page?: number;
-    pageSize?: number;
-    onlyCreditCards?: boolean;
 }
 
 export const fetchConnectors = createAsyncThunk<
@@ -60,17 +58,8 @@ export const fetchConnectors = createAsyncThunk<
         if (params?.search) {
             queryParams.append('search', params.search);
         }
-        if (params?.page) {
-            queryParams.append('page', params.page.toString());
-        }
-        if (params?.pageSize) {
-            queryParams.append('pageSize', params.pageSize.toString());
-        }
-        if (params?.onlyCreditCards) {
-            queryParams.append('onlyCreditCards', 'true');
-        }
         const queryString = queryParams.toString();
-        const endpoint = `/api/bank/connectors${queryString ? `?${queryString}` : ''}`;
+        const endpoint = `/api/bank/connectors/filtered${queryString ? `?${queryString}` : ''}`;
         const response = await apiClient.get<ConnectorsResponse>(endpoint, {
             Authorization: `Bearer ${token}`,
         });
@@ -255,7 +244,6 @@ export const deleteConnection = createAsyncThunk<
     }
 });
 
-// ==================== Vinculação de Contas ====================
 
 export interface LinkAccountRequest {
     bankAccountId: string;
@@ -291,7 +279,6 @@ export const linkAccount = createAsyncThunk<
     }
 });
 
-// ==================== Importação ====================
 
 export interface ImportTransactionsRequest {
     bankAccountId: string;
@@ -327,7 +314,6 @@ export const importTransactions = createAsyncThunk<
                 Authorization: `Bearer ${token}`,
             },
         );
-
         return response;
     } catch (error) {
         const apiError = error as ApiError;
@@ -397,7 +383,6 @@ export const fetchBankTransactions = createAsyncThunk<
     }
 });
 
-// ==================== Reconciliação ====================
 
 export interface TransactionMatch {
     bankTransaction: BankTransaction;
@@ -563,7 +548,6 @@ export const unlinkTransaction = createAsyncThunk<
     }
 });
 
-// ==================== Monitoramento de Jobs ====================
 
 export interface QueueStatus {
     waiting: number;

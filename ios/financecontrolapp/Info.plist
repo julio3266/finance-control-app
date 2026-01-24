@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>financecontrol</string>
           <string>com.anonymous.financecontrolapp</string>
         </array>
       </dict>

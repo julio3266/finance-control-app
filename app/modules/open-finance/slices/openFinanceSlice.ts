@@ -94,11 +94,9 @@ const openFinanceSlice = createSlice({
         setSearchQuery: (state, action) => {
             state.searchQuery = action.payload;
             state.connectors = [];
-            state.pagination = null;
         },
         resetConnectors: (state) => {
             state.connectors = [];
-            state.pagination = null;
             state.connectorsError = null;
         },
         clearConnectToken: (state) => {
@@ -119,16 +117,8 @@ const openFinanceSlice = createSlice({
             })
             .addCase(fetchConnectors.fulfilled, (state, action) => {
                 state.connectorsLoading = false;
-                const newConnectors = action.payload.connectors || [];
-                const pagination = action.payload.pagination;
-
-                if (!pagination || pagination.currentPage === 1) {
-                    state.connectors = newConnectors;
-                } else {
-                    state.connectors = [...state.connectors, ...newConnectors];
-                }
-
-                state.pagination = pagination;
+                state.connectors = action.payload.connectors || [];
+                state.pagination = null;
             })
             .addCase(fetchConnectors.rejected, (state, action) => {
                 state.connectorsLoading = false;

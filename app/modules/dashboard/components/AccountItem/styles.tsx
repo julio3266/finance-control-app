@@ -8,7 +8,7 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 12,
-            paddingHorizontal: 0,
+            paddingHorizontal: 4,
             marginBottom: 0,
         },
         logoContainer: {
@@ -21,6 +21,15 @@ export const styles = (theme: ReturnType<typeof useTheme>) =>
             overflow: 'hidden',
             alignItems: 'center',
             justifyContent: 'center',
+        },
+        logoWrapperWithBg: {
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            overflow: 'hidden',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#FFFFFF',
         },
         logo: {
             width: 40,

@@ -1,6 +1,7 @@
 import { store } from '@app/store/index';
 import { logout } from '@auth/slices/authSlice';
 import { persistor } from '@app/store';
+import { apiClient } from '@app/utils/api';
 
 /**
  * Verifica se a sessão expirou baseado no expiresAt
@@ -30,6 +31,7 @@ export const checkAndLogoutIfExpired = async (): Promise<void> => {
     const { expiresAt, isAuthenticated } = auth;
 
     if (isAuthenticated && isSessionExpired(expiresAt)) {
+        apiClient.setToken(null);
         store.dispatch(logout());
         await persistor.purge();
     }

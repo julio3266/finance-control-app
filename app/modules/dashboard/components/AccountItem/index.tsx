@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 import { formatCurrency } from '@app/utils/formatCurrency';
 import { styles } from './styles';
 
@@ -57,11 +57,11 @@ export const AccountItem: React.FC<AccountItemProps> = ({ account, onPress }) =>
 
         if (isSvg) {
             return (
-                <View style={styled.logoWrapper}>
-                    <SvgUri
+                <View style={styled.logoWrapperWithBg}>
+                    <SvgCssUri
                         uri={account.institutionLogo}
-                        width={40}
-                        height={40}
+                        width={32}
+                        height={32}
                         onError={() => setLogoError(true)}
                     />
                 </View>

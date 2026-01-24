@@ -8,3 +8,4 @@ export {
 export { RepeatPicker, type RepeatPeriod } from './RepeatPicker';
 export { DatePicker } from './DatePicker';
 export { InvestmentTypePickerModal, type InvestmentType } from './InvestmentTypePicker';
+export { TransactionCreationModal, type TransactionModalType } from './TransactionCreationModal';

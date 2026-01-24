@@ -98,8 +98,6 @@ export const styles = (_theme: ReturnType<typeof useTheme>, fullWidth?: boolean)
             flexDirection: 'row',
             alignItems: 'center',
             gap: 6,
-            flex: 1,
-            minWidth: 0,
         },
         financialLabel: {
             fontSize: 12,
@@ -110,8 +108,8 @@ export const styles = (_theme: ReturnType<typeof useTheme>, fullWidth?: boolean)
             fontSize: 16,
             fontWeight: '700',
             color: '#ffffff',
-            marginLeft: 12,
-            flexShrink: 0,
+            textAlign: 'right',
+            minWidth: 100,
         },
         footer: {
             flexDirection: 'row',

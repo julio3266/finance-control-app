@@ -1,5 +1,5 @@
 import { useTheme } from '@app/utils/useTheme';
-import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleProp, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { styles } from './styles';
 import { Loader } from '../Loader';
 
@@ -26,7 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
     const buttonStyles = styles(theme);
 
     const getButtonStyle = (): StyleProp<ViewStyle> => {
-        const baseStyle = [buttonStyles.button];
+        const baseStyle: ViewStyle[] = [buttonStyles.button];
 
         if (variant === 'primary') baseStyle.push(buttonStyles.buttonPrimary);
         if (variant === 'secondary') baseStyle.push(buttonStyles.buttonSecondary);
@@ -42,8 +42,8 @@ export const Button: React.FC<ButtonProps> = ({
         return baseStyle;
     };
 
-    const getTextStyle = () => {
-        const baseStyle = [buttonStyles.buttonText];
+    const getTextStyle = (): StyleProp<TextStyle> => {
+        const baseStyle: TextStyle[] = [buttonStyles.buttonText];
 
         if (variant === 'primary') baseStyle.push(buttonStyles.buttonTextPrimary);
         if (variant === 'secondary') baseStyle.push(buttonStyles.buttonTextSecondary);

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '@app/utils/useTheme';
 import { colors } from '@app/utils/colors';
 import { formatCurrency } from '@app/utils/formatCurrency';
-import { SvgUri } from 'react-native-svg';
+import { SvgCssUri } from 'react-native-svg/css';
 import Feather from '@expo/vector-icons/Feather';
 import { styles } from './styles';
 
@@ -44,7 +44,7 @@ export const CreditCardListItem: React.FC<CreditCardListItemProps> = ({
             if (isSvg) {
                 return (
                     <View style={styled.brandLogoContainer}>
-                        <SvgUri
+                        <SvgCssUri
                             uri={brandIconUrl}
                             width={32}
                             height={32}

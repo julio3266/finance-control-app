@@ -6,11 +6,14 @@ import { colors } from '@app/utils/colors';
 interface FilterOption {
     label: string;
     value: string;
+    selectedColor?: string;
+    accountSource?: 'manual' | 'open_finance'; // Para identificar o tipo de conta
 }
 
 interface FilterChipsProps {
     options: FilterOption[];
     selectedValue?: string;
+    selectedValues?: string[];
     onSelect: (value: string) => void;
     multiple?: boolean;
 }
@@ -18,6 +21,7 @@ interface FilterChipsProps {
 export const FilterChips: React.FC<FilterChipsProps> = ({
     options,
     selectedValue,
+    selectedValues,
     onSelect,
     multiple = false,
 }) => {
@@ -31,7 +35,18 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
             contentContainerStyle={styled.container}
         >
             {options.map((option) => {
-                const isSelected = selectedValue === option.value;
+                let isSelected = false;
+                if (multiple) {
+                    // Para múltiplas seleções, verifica se está no array ou se é "all" e não há seleções
+                    if (option.value === 'all') {
+                        isSelected = !selectedValues || selectedValues.length === 0;
+                    } else {
+                        isSelected = selectedValues?.includes(option.value) || false;
+                    }
+                } else {
+                    isSelected = selectedValue === option.value;
+                }
+                const selectedColor = option.selectedColor || colors.primary[600];
                 return (
                     <TouchableOpacity
                         key={option.value}
@@ -39,8 +54,8 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
                             styled.chip,
                             isSelected && styled.chipSelected,
                             {
-                                backgroundColor: isSelected ? colors.primary[600] : theme.cardBg,
-                                borderColor: isSelected ? colors.primary[600] : theme.cardBorder,
+                                backgroundColor: isSelected ? selectedColor : theme.cardBg,
+                                borderColor: isSelected ? selectedColor : theme.cardBorder,
                             },
                         ]}
                         onPress={() => onSelect(option.value)}

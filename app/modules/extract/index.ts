@@ -1,3 +1,3 @@
-export { ExtractRoutes } from './routes';
-export type { ExtractStackParamList } from './routes';
+export { ExtractRoutes, FilterRoutes } from './routes';
+export type { ExtractStackParamList, FilterStackParamList } from './routes';
 export { ExtractScreen } from './screens';

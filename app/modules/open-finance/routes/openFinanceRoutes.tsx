@@ -1,12 +1,26 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ConnectAccountsScreen, ConnectInstitutionScreen } from '../screens';
+import { ConnectAccountsScreen, ConnectInstitutionScreen, MyConnectionsScreen } from '../screens';
 import type { Connector } from '../slices';
 
+export type PluggyProduct =
+    | 'ACCOUNTS'
+    | 'CREDIT_CARDS'
+    | 'TRANSACTIONS'
+    | 'PAYMENT_DATA'
+    | 'INVESTMENTS'
+    | 'INVESTMENTS_TRANSACTIONS'
+    | 'IDENTITY'
+    | 'BROKERAGE_NOTE'
+    | 'MOVE_SECURITY'
+    | 'LOANS';
+
 export type OpenFinanceStackParamList = {
+    MyConnections: undefined;
     ConnectAccounts: { onlyCreditCards?: boolean } | undefined;
     ConnectInstitution: {
         connector: Connector;
+        products?: PluggyProduct[];
     };
 };
 
@@ -18,13 +32,14 @@ export const OpenFinanceRoutes: React.FC = () => (
             headerShown: false,
         }}
     >
+        <Stack.Screen name="MyConnections" component={MyConnectionsScreen} />
         <Stack.Screen name="ConnectAccounts" component={ConnectAccountsScreen} />
         <Stack.Screen
             name="ConnectInstitution"
             component={ConnectInstitutionScreen}
             options={{
-                presentation: 'card',
-                animation: 'slide_from_right',
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
             }}
         />
     </Stack.Navigator>
