@@ -7,7 +7,11 @@
     "extra": {
       "API_URL": "https://www.api-qa.financecontrolapp.com.br",
       "API_TIMEOUT": "30000",
-      "ENV": "qa"
+      "ENV": "qa",
+      "router": {},
+      "eas": {
+        "projectId": "1e029301-90ea-48f6-8ec5-872840bf33a5"
+      }
     },
     "plugins": [
       "expo-router",
@@ -41,6 +45,7 @@
       "associatedDomains": [
         "applinks:financecontrolapp.com.br"
       ]
-    }
+    },
+    "owner": "finance-control"
   }
 }
